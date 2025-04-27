@@ -192,15 +192,13 @@ public inherited sharing virtual class TriggerBase {
 			this instanceof TriggerAction.BeforeUpdate
 		) {
 			this.incrementUpdateCounts(this.context, this.triggerNew);
-			((TriggerAction.BeforeUpdate) this)
-				.beforeUpdate(this.triggerNew, this.triggerOld);
+			((TriggerAction.BeforeUpdate) this).beforeUpdate(this.triggerNew, this.triggerOld);
 		} else if (
 			this.context == System.TriggerOperation.AFTER_UPDATE &&
 			this instanceof TriggerAction.AfterUpdate
 		) {
 			this.incrementUpdateCounts(this.context, this.triggerNew);
-			((TriggerAction.AfterUpdate) this)
-				.afterUpdate(this.triggerNew, this.triggerOld);
+			((TriggerAction.AfterUpdate) this).afterUpdate(this.triggerNew, this.triggerOld);
 		} else if (
 			this.context == System.TriggerOperation.BEFORE_DELETE &&
 			this instanceof TriggerAction.BeforeDelete
@@ -252,9 +250,7 @@ public inherited sharing virtual class TriggerBase {
 		List<SObject> records
 	) {
 		for (SObject obj : records) {
-			Map<Id, Integer> idToUpdateCount = CONTEXT_TO_UPDATE_COUNT.get(
-				triggerContext
-			);
+			Map<Id, Integer> idToUpdateCount = CONTEXT_TO_UPDATE_COUNT.get(triggerContext);
 			Integer updateCount = idToUpdateCount.get(obj.Id);
 			if (updateCount == null) {
 				updateCount = 0;
@@ -313,10 +309,7 @@ public inherited sharing virtual class TriggerBase {
 	protected String sObjectName {
 		get {
 			if (sObjectName == null) {
-				sObjectName = this.sObjectType.getDescribe(
-						SObjectDescribeOptions.DEFERRED
-					)
-					.getName();
+				sObjectName = this.sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).getName();
 			}
 			return sObjectName;
 		}
@@ -358,9 +351,7 @@ public inherited sharing virtual class TriggerBase {
 
 	private Integer triggerSize {
 		get {
-			return triggerNew != null
-				? triggerNew.size()
-				: triggerOld != null ? triggerOld.size() : 0;
+			return triggerNew != null ? triggerNew.size() : triggerOld != null ? triggerOld.size() : 0;
 		}
 	}
 

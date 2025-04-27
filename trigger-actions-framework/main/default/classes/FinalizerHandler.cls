@@ -121,10 +121,7 @@ public with sharing virtual class FinalizerHandler {
 	 * @param finalizerMetadata The metadata of the finalizer to execute.
 	 * @param context The context to pass to the finalizer's `execute` method.
 	 */
-	private void callReferencedFinalizer(
-		DML_Finalizer__mdt finalizerMetadata,
-		Context context
-	) {
+	private void callReferencedFinalizer(DML_Finalizer__mdt finalizerMetadata, Context context) {
 		Object dynamicInstance;
 		String className = finalizerMetadata.Apex_Class_Name__c;
 		if (FinalizerHandler.isBypassed(className)) {
@@ -166,9 +163,7 @@ public with sharing virtual class FinalizerHandler {
 	}
 
 	private void handleFinalizerException(String errorFormat, String className) {
-		throw new FinalizerException(
-			String.format(errorFormat, new List<String>{ className })
-		);
+		throw new FinalizerException(String.format(errorFormat, new List<String>{ className }));
 	}
 
 	/**
@@ -178,10 +173,7 @@ public with sharing virtual class FinalizerHandler {
 	 * @param requiredPermission The required permission for the finalizer.
 	 * @return True if bypassed, false otherwise.
 	 */
-	private boolean isBypassed(
-		String bypassPermission,
-		String requiredPermission
-	) {
+	private boolean isBypassed(String bypassPermission, String requiredPermission) {
 		return (bypassPermission != null && permissionMap.get(bypassPermission)) ||
 			(requiredPermission != null && !permissionMap.get(requiredPermission));
 	}
@@ -192,10 +184,7 @@ public with sharing virtual class FinalizerHandler {
 	 */
 	private void populatePermissionMap(String permissionName) {
 		if (permissionName != null && !permissionMap.containsKey(permissionName)) {
-			permissionMap.put(
-				permissionName,
-				FeatureManagement.checkPermission(permissionName)
-			);
+			permissionMap.put(permissionName, FeatureManagement.checkPermission(permissionName));
 		}
 	}
 
@@ -231,8 +220,7 @@ public with sharing virtual class FinalizerHandler {
 		 *  equal to, or greater than the specified object.
 		 */
 		public Integer compareTo(Object other) {
-			Decimal difference = (this.metadata.Order__c -
-			((FinalizerSorter) other).metadata.Order__c);
+			Decimal difference = (this.metadata.Order__c - ((FinalizerSorter) other).metadata.Order__c);
 			return difference < 0 ? -1 : difference == 0 ? 0 : 1;
 		}
 	}

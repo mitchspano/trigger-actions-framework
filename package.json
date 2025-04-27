@@ -4,33 +4,17 @@
 	"version": "1.0.0",
 	"description": "Apex Trigger Actions Framework",
 	"scripts": {
-		"lint": "npm run lint:lwc && npm run lint:aura",
-		"lint:aura": "eslint **/aura/**",
-		"lint:lwc": "eslint **/lwc/**",
-		"test": "npm run test:unit",
-		"test:unit": "sfdx-lwc-jest",
-		"test:unit:watch": "sfdx-lwc-jest --watch",
-		"test:unit:debug": "sfdx-lwc-jest --debug",
-		"test:unit:coverage": "sfdx-lwc-jest --coverage",
-		"prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,yaml,yml}\"",
-		"prettier:verify": "prettier --list-different \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,yaml,yml}\""
+		"precommit": "lint-staged",
+		"prepare": "husky",
+		"prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+		"prettier:verify": "prettier --list-different \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\""
 	},
 	"devDependencies": {
-		"@prettier/plugin-xml": "^0.13.1",
-		"@salesforce/eslint-config-lwc": "^0.11.1",
-		"@salesforce/eslint-plugin-aura": "^2.0.0",
-		"@salesforce/sfdx-lwc-jest": "^0.10.4",
-		"eslint": "^7.24.0",
-		"eslint-config-prettier": "^8.1.0",
-		"husky": "^6.0.0",
-		"lint-staged": "^10.5.4",
-		"prettier": "3.0.2",
-		"prettier-plugin-apex": "2.0.1"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
+		"@prettier/plugin-xml": "^3.4.1",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.5.0",
+		"prettier": "3.5.3",
+		"prettier-plugin-apex": "2.2.5"
 	},
 	"lint-staged": {
 		"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [

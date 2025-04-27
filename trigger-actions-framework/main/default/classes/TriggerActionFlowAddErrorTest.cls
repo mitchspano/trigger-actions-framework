@@ -31,15 +31,8 @@ private class TriggerActionFlowAddErrorTest {
 
 		TriggerActionFlowAddError.addError(requests);
 
-		System.Assert.isTrue(
-			account.hasErrors(),
-			'The Account should have an error'
-		);
-		System.Assert.areEqual(
-			1,
-			account.getErrors().size(),
-			'There should only be one error'
-		);
+		System.Assert.isTrue(account.hasErrors(), 'The Account should have an error');
+		System.Assert.areEqual(1, account.getErrors().size(), 'There should only be one error');
 		System.Assert.areEqual(
 			MY_STRING,
 			account.getErrors()[0].getMessage(),
@@ -57,15 +50,8 @@ private class TriggerActionFlowAddErrorTest {
 
 		TriggerActionFlowAddError.addError(requests);
 
-		System.Assert.isTrue(
-			account.hasErrors(),
-			'The Account should have an error'
-		);
-		System.Assert.areEqual(
-			1,
-			account.getErrors().size(),
-			'There should only be one error'
-		);
+		System.Assert.isTrue(account.hasErrors(), 'The Account should have an error');
+		System.Assert.areEqual(1, account.getErrors().size(), 'There should only be one error');
 		System.Assert.areEqual(
 			MY_STRING,
 			account.getErrors()[0].getMessage(),

@@ -5,8 +5,7 @@
 	>Enter the name of the sObject you want to have this action execute on during the before insert context</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText
-	>Enter the name of the sObject you want to have this action execute on during the before insert context</inlineHelpText>
+    <inlineHelpText>Enter the name of the sObject you want to have this action execute on during the before insert context</inlineHelpText>
     <label>Before Insert</label>
     <referenceTo>sObject_Trigger_Setting__mdt</referenceTo>
     <relationshipLabel>Before Insert</relationshipLabel>

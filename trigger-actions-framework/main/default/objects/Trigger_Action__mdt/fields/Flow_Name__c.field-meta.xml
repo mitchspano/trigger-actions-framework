@@ -5,8 +5,7 @@
 	>Enter the API name of the flow you would like to execute.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText
-	>Enter the API name of the flow you would like to execute.</inlineHelpText>
+    <inlineHelpText>Enter the API name of the flow you would like to execute.</inlineHelpText>
     <label>Flow Name</label>
     <length>255</length>
     <required>false</required>

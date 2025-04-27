@@ -6,8 +6,7 @@
 	>Set this to true to bypass this Trigger Action from being called</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText
-	>Set this to true to bypass this Trigger Action from being called</inlineHelpText>
+    <inlineHelpText>Set this to true to bypass this Trigger Action from being called</inlineHelpText>
     <label>Bypass Execution</label>
     <type>Checkbox</type>
 </CustomField>

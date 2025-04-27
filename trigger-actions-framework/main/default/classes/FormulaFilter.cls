@@ -23,8 +23,7 @@ global class FormulaFilter {
 	private static final String ERROR_PREFIX = 'Please check the `SObject_Trigger_Setting__mdt` metadata for the the {0} sObject.';
 	@TestVisible
 	private static final String MISSING_CLASS_NAME =
-		ERROR_PREFIX +
-		' The record is missing the `TriggerRecord_Class_Name__c` field.';
+		ERROR_PREFIX + ' The record is missing the `TriggerRecord_Class_Name__c` field.';
 	@TestVisible
 	private static final String INVALID_CLASS =
 		ERROR_PREFIX +
@@ -74,18 +73,14 @@ global class FormulaFilter {
 		List<SObject> triggerOld
 	) {
 		FormulaFilter.Result result = new FormulaFilter.Result();
-		String entryCriteriaFormula = this.triggerActionConfiguration
-			?.Entry_Criteria__c;
+		String entryCriteriaFormula = this.triggerActionConfiguration?.Entry_Criteria__c;
 
 		if (String.isBlank(entryCriteriaFormula)) {
 			result.triggerNew = triggerNew;
 			result.triggerOld = triggerOld;
 			return result;
 		}
-		String nameOfType = getNameOfType(
-			this.triggerActionConfiguration,
-			this.context
-		);
+		String nameOfType = getNameOfType(this.triggerActionConfiguration, this.context);
 		System.Type triggerRecordSubType = getType(nameOfType);
 		FormulaEval.FormulaInstance fx = getFormulaInstance(
 			triggerRecordSubType,
@@ -97,10 +92,7 @@ global class FormulaFilter {
 		for (Integer i = 0; i < size; i++) {
 			SObject record = triggerNew?.get(i);
 			SObject recordPrior = triggerOld?.get(i);
-			TriggerRecord toProcess = getTriggerRecord(
-				triggerRecordSubType,
-				nameOfType
-			);
+			TriggerRecord toProcess = getTriggerRecord(triggerRecordSubType, nameOfType);
 			toProcess.newSobject = record;
 			toProcess.oldSobject = recordPrior;
 			if ((Boolean) fx.evaluate(toProcess)) {
@@ -120,28 +112,19 @@ global class FormulaFilter {
 		System.Type response = System.Type.forName(className);
 		if (response == null) {
 			throw new IllegalArgumentException(
-				String.format(
-					INVALID_CLASS,
-					new List<String>{ this.sObjectName, className }
-				)
+				String.format(INVALID_CLASS, new List<String>{ this.sObjectName, className })
 			);
 		}
 		return response;
 	}
 
-	private TriggerRecord getTriggerRecord(
-		System.Type triggerRecordSubType,
-		String nameOfType
-	) {
+	private TriggerRecord getTriggerRecord(System.Type triggerRecordSubType, String nameOfType) {
 		TriggerRecord dynamicInstance;
 		try {
 			dynamicInstance = (TriggerRecord) triggerRecordSubType.newInstance();
 		} catch (System.TypeException e) {
 			throw new IllegalArgumentException(
-				String.format(
-					INVALID_SUBTYPE,
-					new List<String>{ this.sObjectName, nameOfType }
-				)
+				String.format(INVALID_SUBTYPE, new List<String>{ this.sObjectName, nameOfType })
 			);
 		}
 		return dynamicInstance;

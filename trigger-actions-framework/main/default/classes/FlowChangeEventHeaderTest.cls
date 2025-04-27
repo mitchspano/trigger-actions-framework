@@ -23,10 +23,7 @@ private with sharing class FlowChangeEventHeaderTest {
 
 	@IsTest
 	private static void shouldBeAbleToConstruct() {
-		System.Assert.isNotNull(
-			header,
-			'Unable to construct a FlowChangeEventHeader'
-		);
+		System.Assert.isNotNull(header, 'Unable to construct a FlowChangeEventHeader');
 	}
 
 	@IsTest
@@ -36,9 +33,7 @@ private with sharing class FlowChangeEventHeaderTest {
 
 	@IsTest
 	private static void shouldBeAbleToCompare() {
-		FlowChangeEventHeader other = new FlowChangeEventHeader(
-			new EventBus.ChangeEventHeader()
-		);
+		FlowChangeEventHeader other = new FlowChangeEventHeader(new EventBus.ChangeEventHeader());
 		other.changeType = 'CREATE';
 
 		System.Assert.areEqual(

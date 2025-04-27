@@ -1,6 +1,13 @@
 {
-	"plugins": ["prettier-plugin-apex"],
+	"arrowParens": "avoid",
+	"bracketSpacing": true,
+	"bracketSameLine": true,
+	"printWidth": 100,
+	"semi": true,
+	"singleQuote": true,
 	"trailingComma": "none",
+	"endOfLine": "lf",
+	"apexInsertFinalNewline": false,
 	"useTabs": true,
 	"overrides": [
 		{
@@ -8,8 +15,55 @@
 			"options": { "parser": "lwc" }
 		},
 		{
+			"files": "*.{cls,trigger}",
+			"options": { "parser": "apex", "tabWidth": 2, "useTabs": true }
+		},
+		{
 			"files": "*.{cmp,page,component}",
-			"options": { "parser": "html" }
+			"options": {
+				"parser": "html",
+				"useTabs": true,
+				"htmlWhitespaceSensitivity": "css"
+			}
+		},
+		{
+			"files": "*.{apex,soql}",
+			"options": { "parser": "apex-anonymous" }
+		},
+		{
+			"files": "*.{yml,yaml}",
+			"options": { "parser": "yaml", "tabWidth": 2, "useTabs": false }
+		},
+		{
+			"files": ".prettier*",
+			"options": { "parser": "json", "printWidth": 80, "useTabs": true }
+		},
+		{
+			"files": "*.xml",
+			"options": {
+				"parser": "xml",
+				"useTabs": true,
+				"singleQuote": false,
+				"xmlSelfClosingSpace": true
+			}
+		},
+		{
+			"files": "*meta.xml",
+			"options": {
+				"parser": "xml",
+				"useTabs": false,
+				"xmlSelfClosingSpace": false
+			}
+		},
+		{
+			"files": "*.json",
+			"options": {
+				"parser": "json-stringify",
+				"useTabs": false,
+				"tabWidth": 2
+			}
 		}
-	]
+	],
+	"plugins": ["prettier-plugin-apex", "@prettier/plugin-xml"],
+	"$schema": "https://json.schemastore.org/prettierrc"
 }

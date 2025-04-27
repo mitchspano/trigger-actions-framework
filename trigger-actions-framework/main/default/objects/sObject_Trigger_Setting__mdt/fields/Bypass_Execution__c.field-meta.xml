@@ -6,8 +6,7 @@
 	>Set this to true to bypass all Trigger Actions from being called on this sObject</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText
-	>Set this to true to bypass all Trigger Actions from being called on this sObject</inlineHelpText>
+    <inlineHelpText>Set this to true to bypass all Trigger Actions from being called on this sObject</inlineHelpText>
     <label>Bypass Execution</label>
     <type>Checkbox</type>
 </CustomField>

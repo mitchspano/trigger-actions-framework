@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v1
+      - name: "Setup node"
+        uses: actions/setup-node@v4
         with:
-          node-version: ">=14"
-          check-latest: true
+          node-version: "lts/*"
 
       - name: Install Salesforce CLI + Scanner
         run: |
@@ -37,6 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Authenticate into DevHub
+        id: authenticate
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
           sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub

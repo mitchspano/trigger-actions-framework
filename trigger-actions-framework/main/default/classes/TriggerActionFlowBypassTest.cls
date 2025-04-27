@@ -30,10 +30,7 @@ private class TriggerActionFlowBypassTest {
 
 		TriggerActionFlowBypass.bypass(requests);
 
-		System.Assert.isTrue(
-			TriggerBase.isBypassed(MY_STRING),
-			'The Object should be bypassed'
-		);
+		System.Assert.isTrue(TriggerBase.isBypassed(MY_STRING), 'The Object should be bypassed');
 	}
 
 	@IsTest
@@ -58,10 +55,7 @@ private class TriggerActionFlowBypassTest {
 
 		TriggerActionFlowBypass.bypass(requests);
 
-		System.Assert.isTrue(
-			TriggerActionFlow.isBypassed(MY_STRING),
-			'The Flow should be bypassed'
-		);
+		System.Assert.isTrue(TriggerActionFlow.isBypassed(MY_STRING), 'The Flow should be bypassed');
 	}
 
 	@IsTest

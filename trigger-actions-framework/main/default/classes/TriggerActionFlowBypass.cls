@@ -54,11 +54,7 @@ public inherited sharing class TriggerActionFlowBypass {
 			required=true
 		)
 		public String name;
-		@InvocableVariable(
-			label='Bypass Type'
-			description='Apex, Flow, or Object'
-			required=true
-		)
+		@InvocableVariable(label='Bypass Type' description='Apex, Flow, or Object' required=true)
 		public String bypassType;
 	}
 

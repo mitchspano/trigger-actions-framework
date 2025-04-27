@@ -55,22 +55,11 @@ public inherited sharing class TriggerActionFlowAddError {
 	 * @description This class represents a request to add an error to an sObject.
 	 */
 	public class Request {
-		@InvocableVariable(
-			label='Record'
-			description='Record to add the error to'
-			required=true
-		)
+		@InvocableVariable(label='Record' description='Record to add the error to' required=true)
 		public SObject record;
-		@InvocableVariable(
-			label='Field Name'
-			description='API name of corresponding field'
-		)
+		@InvocableVariable(label='Field Name' description='API name of corresponding field')
 		public String fieldName;
-		@InvocableVariable(
-			label='Error Message'
-			description='Error Message'
-			required=true
-		)
+		@InvocableVariable(label='Error Message' description='Error Message' required=true)
 		public String errorMessage;
 	}
 }

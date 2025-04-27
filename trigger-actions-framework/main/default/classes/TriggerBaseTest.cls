@@ -70,16 +70,8 @@ private class TriggerBaseTest {
 		base.triggerNew = null;
 		base.triggerOld = null;
 
-		System.Assert.areEqual(
-			null,
-			base.triggerNew,
-			'triggerNew should match Trigger.new'
-		);
-		System.Assert.areEqual(
-			null,
-			base.triggerOld,
-			'triggerOld should match Trigger.old'
-		);
+		System.Assert.areEqual(null, base.triggerNew, 'triggerNew should match Trigger.new');
+		System.Assert.areEqual(null, base.triggerOld, 'triggerOld should match Trigger.old');
 	}
 
 	@IsTest
@@ -182,11 +174,7 @@ private class TriggerBaseTest {
 			myException = e;
 		}
 
-		System.Assert.areNotEqual(
-			null,
-			myException,
-			'An exception should be thrown'
-		);
+		System.Assert.areNotEqual(null, myException, 'An exception should be thrown');
 		System.Assert.areEqual(
 			TriggerBase.HANDLER_OUTSIDE_TRIGGER_MESSAGE,
 			myException.getMessage(),
@@ -276,10 +264,7 @@ private class TriggerBaseTest {
 	private static void isBypassedShouldSucceed() {
 		TriggerBase.bypass(ACCOUNT);
 
-		System.Assert.isTrue(
-			TriggerBase.isBypassed(ACCOUNT),
-			BYPASSES_SHOULD_BE_CONFIGURED_CORRECTLY
-		);
+		System.Assert.isTrue(TriggerBase.isBypassed(ACCOUNT), BYPASSES_SHOULD_BE_CONFIGURED_CORRECTLY);
 	}
 
 	@IsTest
@@ -299,11 +284,7 @@ private class TriggerBaseTest {
 	private static void offsetRowsShouldWork() {
 		TriggerBase.offsetExistingDmlRows();
 
-		System.Assert.areEqual(
-			0,
-			TriggerBase.existingDmlRowsOffset,
-			'Offset is not working properly'
-		);
+		System.Assert.areEqual(0, TriggerBase.existingDmlRowsOffset, 'Offset is not working properly');
 	}
 
 	@IsTest
@@ -343,10 +324,7 @@ private class TriggerBaseTest {
 		stack.push(FIRST);
 		stack.pop();
 
-		System.Assert.isTrue(
-			stack.isEmpty(),
-			'The stack is empty but unable to identify as such'
-		);
+		System.Assert.isTrue(stack.isEmpty(), 'The stack is empty but unable to identify as such');
 	}
 
 	@IsTest
@@ -387,11 +365,7 @@ private class TriggerBaseTest {
 		stack.push(SECOND);
 		stack.push(THIRD);
 
-		System.Assert.areEqual(
-			THIRD,
-			stack.peek(),
-			'The last element in the stack is not peeked'
-		);
+		System.Assert.areEqual(THIRD, stack.peek(), 'The last element in the stack is not peeked');
 	}
 
 	@IsTest
@@ -401,11 +375,7 @@ private class TriggerBaseTest {
 		stack.push(SECOND);
 		stack.push(THIRD);
 
-		System.Assert.areEqual(
-			3,
-			stack.depth(),
-			'The stack is not properly calculating its depth'
-		);
+		System.Assert.areEqual(3, stack.depth(), 'The stack is not properly calculating its depth');
 	}
 
 	@IsTest
@@ -452,16 +422,10 @@ private class TriggerBaseTest {
 		public void afterInsert(List<SObject> triggerNew) {
 			this.executed = true;
 		}
-		public void beforeUpdate(
-			List<SObject> triggerNew,
-			List<SObject> triggerOld
-		) {
+		public void beforeUpdate(List<SObject> triggerNew, List<SObject> triggerOld) {
 			this.executed = true;
 		}
-		public void afterUpdate(
-			List<SObject> triggerNew,
-			List<SObject> triggerOld
-		) {
+		public void afterUpdate(List<SObject> triggerNew, List<SObject> triggerOld) {
 			this.executed = true;
 		}
 		public void beforeDelete(List<SObject> triggerOld) {

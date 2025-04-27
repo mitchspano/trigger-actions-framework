@@ -4,8 +4,7 @@
     <description>Enter the namespace object for this trigger.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText
-	>Enter the namespace object for this trigger.</inlineHelpText>
+    <inlineHelpText>Enter the namespace object for this trigger.</inlineHelpText>
     <label>Object Namespace</label>
     <length>255</length>
     <required>false</required>

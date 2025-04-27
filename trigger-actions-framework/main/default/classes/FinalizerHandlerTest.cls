@@ -94,10 +94,7 @@ private with sharing class FinalizerHandlerTest {
 	@IsTest
 	private static void staticallyBypassedFinalizerShouldNotExecute() {
 		handler.allFinalizers = new List<DML_Finalizer__mdt>{
-			new DML_Finalizer__mdt(
-				Apex_Class_Name__c = TEST_FOO_FINALIZER,
-				Order__c = 1
-			)
+			new DML_Finalizer__mdt(Apex_Class_Name__c = TEST_FOO_FINALIZER, Order__c = 1)
 		};
 
 		FinalizerHandler.bypass(TEST_FOO_FINALIZER);
@@ -150,14 +147,8 @@ private with sharing class FinalizerHandlerTest {
 	@IsTest
 	private static void finalizersShouldExecuteInOrder() {
 		handler.allFinalizers = new List<DML_Finalizer__mdt>{
-			new DML_Finalizer__mdt(
-				Apex_Class_Name__c = TEST_FOO_FINALIZER,
-				Order__c = 1
-			),
-			new DML_Finalizer__mdt(
-				Apex_Class_Name__c = TEST_BAR_FINALIZER,
-				Order__c = 2
-			)
+			new DML_Finalizer__mdt(Apex_Class_Name__c = TEST_FOO_FINALIZER, Order__c = 1),
+			new DML_Finalizer__mdt(Apex_Class_Name__c = TEST_BAR_FINALIZER, Order__c = 2)
 		};
 
 		handler.handleDynamicFinalizers();
@@ -213,10 +204,7 @@ private with sharing class FinalizerHandlerTest {
 		System.Assert.isNotNull(myException, EXCEPTION_SHOULD_BE_THROWN);
 
 		System.Assert.areEqual(
-			String.format(
-				FinalizerHandler.INVALID_TYPE_ERROR_FINALIZER,
-				new List<String>{ MY_CLASS }
-			),
+			String.format(FinalizerHandler.INVALID_TYPE_ERROR_FINALIZER, new List<String>{ MY_CLASS }),
 			myException.getMessage(),
 			EXCEPTION_SHOULD_HAVE_CORRECT_MESSAGE
 		);
