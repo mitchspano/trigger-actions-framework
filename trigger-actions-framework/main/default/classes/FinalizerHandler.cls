@@ -194,9 +194,48 @@ public with sharing virtual class FinalizerHandler {
 		if (permissionName != null && !permissionMap.containsKey(permissionName)) {
 			permissionMap.put(
 				permissionName,
-				FeatureManagement.checkPermission(permissionName)
+				checkPermissionNamespaceAware(permissionName)
 			);
 		}
+	}
+
+	/**
+	 * @description Check permission in a namespace-aware manner.
+	 * Handles both namespaced (namespace__permission) and non-namespaced permissions.
+	 * When a namespaced permission is detected, tries both the original name and the
+	 * permission name without namespace to ensure compatibility across package contexts.
+	 *
+	 * @param permissionName The permission name, which may include a namespace prefix
+	 * @return True if the user has the permission, false otherwise
+	 */
+	@TestVisible
+	private Boolean checkPermissionNamespaceAware(String permissionName) {
+		String doubleUnderscore = '__';
+		
+		// First try the permission as provided
+		try {
+			if (FeatureManagement.checkPermission(permissionName)) {
+				return true;
+			}
+		} catch (Exception e) {
+			// Permission doesn't exist in current context, continue to try alternatives
+		}
+		
+		// If the permission contains namespace prefix, try without it
+		if (permissionName.contains(doubleUnderscore)) {
+			List<String> parts = permissionName.split(doubleUnderscore, 2);
+			if (parts.size() == 2) {
+				String permission = parts[1];
+				try {
+					return FeatureManagement.checkPermission(permission);
+				} catch (Exception e) {
+					// Permission doesn't exist without namespace either
+				}
+			}
+		}
+		
+		// Default to false if permission cannot be found in any context
+		return false;
 	}
 
 	@TestVisible
