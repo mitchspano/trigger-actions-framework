@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Telemetry__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When enabled, telemetry information will be logged for this trigger action. This includes Salesforce limits and performance metrics. Should not be enabled in production environments.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Enable telemetry logging for this trigger action. Logs Salesforce limits and performance metrics to help with debugging. Not recommended for production use.</inlineHelpText>
+    <label>Enable Telemetry</label>
+    <type>Checkbox</type>
+</CustomField>
