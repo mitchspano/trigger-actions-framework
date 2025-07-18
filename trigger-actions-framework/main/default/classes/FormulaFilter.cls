@@ -103,7 +103,7 @@ global class FormulaFilter {
 			);
 			toProcess.newSobject = record;
 			toProcess.oldSobject = recordPrior;
-			if ((Boolean) fx.evaluate(toProcess)) {
+			if ((Boolean) fx.evaluate(toProcess) == true) {
 				result.triggerNew.add(record);
 				result.triggerOld.add(recordPrior);
 			}

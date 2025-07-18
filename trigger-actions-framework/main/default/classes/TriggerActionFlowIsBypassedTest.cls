@@ -15,7 +15,7 @@
  */
 
 @SuppressWarnings('PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs')
-@IsTest
+@IsTest(IsParallel=true)
 private class TriggerActionFlowIsBypassedTest {
 	private static final String MY_STRING = 'MY_STRING';
 	private static List<TriggerActionFlowIsBypassed.Request> requests = new List<TriggerActionFlowIsBypassed.Request>();

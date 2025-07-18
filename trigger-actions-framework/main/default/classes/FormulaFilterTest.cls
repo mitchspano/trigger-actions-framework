@@ -16,7 +16,7 @@
 @SuppressWarnings(
 	'PMD.ApexUnitTestClassShouldHaveRunAs, PMD.AvoidGlobalModifier'
 )
-@IsTest
+@IsTest(IsParallel=true)
 global class FormulaFilterTest {
 	private static final String ACCOUNT_SOBJECT_NAME = 'Account';
 	private static final String EXCEPTION_SHOULD_BE_THROWN = 'An exception should be thrown';
@@ -324,6 +324,33 @@ global class FormulaFilterTest {
 			),
 			caught.getMessage(),
 			'The exception message should match the expected error'
+		);
+	}
+
+	@IsTest
+	private static void formulaEvaluatingToNullShouldBeTreatedAsFalse() {
+		triggerNew[1].Description = 'example 1';
+		configuration.Entry_Criteria__c = 'CONTAINS(record.Description, "example")';
+		FormulaFilter filter = new FormulaFilter(
+			configuration,
+			TriggerOperation.BEFORE_UPDATE,
+			ACCOUNT_SOBJECT_NAME
+		);
+
+		FormulaFilter.Result result = filter.filterByEntryCriteria(
+			triggerNew,
+			triggerOld
+		);
+
+		System.Assert.areEqual(
+			1,
+			result.triggerNew.size(),
+			'Only 1 record should be processed when CONTAINS evaluates to null for the first record'
+		);
+		System.Assert.areEqual(
+			1,
+			result.triggerOld.size(),
+			'Only 1 record should be processed when CONTAINS evaluates to null for the first record'
 		);
 	}
 

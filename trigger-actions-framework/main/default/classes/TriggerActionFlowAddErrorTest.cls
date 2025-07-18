@@ -15,7 +15,7 @@
  */
 
 @SuppressWarnings('PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs')
-@IsTest
+@IsTest(IsParallel=true)
 private class TriggerActionFlowAddErrorTest {
 	private static final String MY_STRING = 'MY_STRING';
 	private static final String NAME = 'Name';
