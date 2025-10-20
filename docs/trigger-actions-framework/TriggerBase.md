@@ -110,6 +110,65 @@ True if the object is bypassed, false otherwise.
 
 ---
 
+### `bypass(sObjectType)`
+
+This method bypasses the execution of the specified object.
+
+#### Signature
+```apex
+public static void bypass(Schema.sObjectType sObjectType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| sObjectType | Schema.sObjectType | The sObjectType of the object to bypass. |
+
+#### Return Type
+**void**
+
+---
+
+### `clearBypass(sObjectType)`
+
+This method clears the bypass for the specified object.
+
+#### Signature
+```apex
+public static void clearBypass(Schema.sObjectType sObjectType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| sObjectType | Schema.sObjectType | The sObjectType of the object to clear the bypass for. |
+
+#### Return Type
+**void**
+
+---
+
+### `isBypassed(sObjectType)`
+
+This method checks if the specified object is bypassed.
+
+#### Signature
+```apex
+public static Boolean isBypassed(Schema.sObjectType sObjectType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| sObjectType | Schema.sObjectType | The sObjectType of the object to check the bypass for. |
+
+#### Return Type
+**Boolean**
+
+True if the object is bypassed, false otherwise.
+
+---
+
 ### `clearAllBypasses()`
 
 This method clears all bypasses.

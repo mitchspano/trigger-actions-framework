@@ -169,6 +169,65 @@ True if the Trigger Action is bypassed, false otherwise.
 
 ---
 
+### `bypass(actionType)`
+
+Bypass the execution of a Trigger Action.
+
+#### Signature
+```apex
+public static void bypass(System.Type actionType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| actionType | System.Type | The Type of the Trigger Action to bypass. |
+
+#### Return Type
+**void**
+
+---
+
+### `clearBypass(actionType)`
+
+Clear the bypass for a Trigger Action.
+
+#### Signature
+```apex
+public static void clearBypass(System.Type actionType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| actionType | System.Type | The Type of the Trigger Action to clear the bypass for. |
+
+#### Return Type
+**void**
+
+---
+
+### `isBypassed(actionType)`
+
+Check if a Trigger Action is bypassed.
+
+#### Signature
+```apex
+public static Boolean isBypassed(System.Type actionType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| actionType | System.Type | The Type of the Trigger Action to check. |
+
+#### Return Type
+**Boolean**
+
+True if the Trigger Action is bypassed, false otherwise.
+
+---
+
 ### `clearAllBypasses()`
 
 Clear all bypasses for Trigger Actions.

@@ -111,6 +111,80 @@ public static Boolean isBypassed(String flowName)
 
 ---
 
+### `bypass(flowType)`
+
+*Inherited*
+
+This method bypasses the execution of the Flow for the specified list of records.
+
+#### Signature
+```apex
+public static void bypass(System.Type flowType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| flowType | System.Type | The Type of the Flow to bypass (e.g., Flow.Interview.MyFlow.class). |
+
+#### Return Type
+**void**
+
+#### Throws
+IllegalArgumentException: if the type does not represent a Flow.
+
+---
+
+### `clearBypass(flowType)`
+
+*Inherited*
+
+This method clears the bypass for the specified list of records.
+
+#### Signature
+```apex
+public static void clearBypass(System.Type flowType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| flowType | System.Type | The Type of the Flow to clear the bypass for (e.g., Flow.Interview.MyFlow.class). |
+
+#### Return Type
+**void**
+
+#### Throws
+IllegalArgumentException: if the type does not represent a Flow.
+
+---
+
+### `isBypassed(flowType)`
+
+*Inherited*
+
+This method checks if the Flow is bypassed for the specified list of records.
+
+#### Signature
+```apex
+public static Boolean isBypassed(System.Type flowType)
+```
+
+#### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| flowType | System.Type | The Type of the Flow to check the bypass for (e.g., Flow.Interview.MyFlow.class). |
+
+#### Return Type
+**Boolean**
+
+,[object Object], if the Flow is bypassed for the specified list of records, ,[object Object], otherwise.
+
+#### Throws
+IllegalArgumentException: if the type does not represent a Flow.
+
+---
+
 ### `clearAllBypasses()`
 
 *Inherited*
