@@ -75,7 +75,9 @@
  * This example will execute all Trigger Actions defined in Custom Metadata for the `Account` sObject.
  *
  */
-@SuppressWarnings('PMD.CognitiveComplexity')
+@SuppressWarnings(
+	'PMD.CognitiveComplexity, PMD.StdCyclomaticComplexity, PMD.CyclomaticComplexity'
+)
 public inherited sharing class MetadataTriggerHandler extends TriggerBase implements TriggerAction.BeforeInsert, TriggerAction.AfterInsert, TriggerAction.BeforeUpdate, TriggerAction.AfterUpdate, TriggerAction.BeforeDelete, TriggerAction.AfterDelete, TriggerAction.AfterUndelete {
 	private static final String DOUBLE_UNDERSCORE = '__';
 	private static final String EMPTY_STRING = '';
@@ -144,6 +146,36 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	 */
 	public static Boolean isBypassed(String actionName) {
 		return MetadataTriggerHandler.bypassedActions.contains(actionName);
+	}
+
+	/**
+	 * @description Bypass the execution of a Trigger Action.
+	 *
+	 * @param actionType The Type of the Trigger Action to bypass.
+	 */
+	public static void bypass(System.Type actionType) {
+		MetadataTriggerHandler.bypassedActions.add(actionType.getName());
+	}
+
+	/**
+	 * @description Clear the bypass for a Trigger Action.
+	 *
+	 * @param actionType The Type of the Trigger Action to clear the bypass for.
+	 */
+	public static void clearBypass(System.Type actionType) {
+		MetadataTriggerHandler.bypassedActions.remove(actionType.getName());
+	}
+
+	/**
+	 * @description Check if a Trigger Action is bypassed.
+	 *
+	 * @param actionType The Type of the Trigger Action to check.
+	 * @return True if the Trigger Action is bypassed, false otherwise.
+	 */
+	public static Boolean isBypassed(System.Type actionType) {
+		return MetadataTriggerHandler.bypassedActions.contains(
+			actionType.getName()
+		);
 	}
 
 	/**
