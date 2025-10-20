@@ -14,7 +14,9 @@
    limitations under the License.
  */
 
-@SuppressWarnings('PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs')
+@SuppressWarnings(
+	'PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs, PMD.CyclomaticComplexity'
+)
 @IsTest(isParallel=true)
 private class TriggerActionFlowTest {
 	private static final String BOGUS = 'Bogus';
@@ -89,8 +91,7 @@ private class TriggerActionFlowTest {
 			myException = e;
 		}
 
-		System.Assert.areEqual(
-			null,
+		System.Assert.isNull(
 			myException,
 			'There should be no exception thrown and the System should do nothing when the flow is bypassed'
 		);
@@ -416,7 +417,8 @@ private class TriggerActionFlowTest {
 		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
 		System.Assert.areEqual(
 			true,
-			myException.getMessage().contains('Type must represent a Flow'),
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_REPRESENT_FLOW_ERROR),
 			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
 		);
 	}
@@ -432,7 +434,8 @@ private class TriggerActionFlowTest {
 		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
 		System.Assert.areEqual(
 			true,
-			myException.getMessage().contains('Type must represent a Flow'),
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_REPRESENT_FLOW_ERROR),
 			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
 		);
 	}
@@ -448,7 +451,8 @@ private class TriggerActionFlowTest {
 		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
 		System.Assert.areEqual(
 			true,
-			myException.getMessage().contains('Type must represent a Flow'),
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_REPRESENT_FLOW_ERROR),
 			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
 		);
 	}
@@ -466,7 +470,59 @@ private class TriggerActionFlowTest {
 		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
 		System.Assert.areEqual(
 			true,
-			myException.getMessage().contains('Flow does not exist'),
+			myException.getMessage()
+				.contains(TriggerActionFlow.FLOW_DOES_NOT_EXIST_ERROR),
+			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
+		);
+	}
+
+	@IsTest
+	private static void bypassWithNullTypeShouldThrowException() {
+		try {
+			TriggerActionFlow.bypass((System.Type) null);
+		} catch (Exception e) {
+			myException = e;
+		}
+
+		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
+		System.Assert.areEqual(
+			true,
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_BE_PROVIDED_ERROR),
+			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
+		);
+	}
+
+	@IsTest
+	private static void clearBypassWithNullTypeShouldThrowException() {
+		try {
+			TriggerActionFlow.clearBypass((System.Type) null);
+		} catch (Exception e) {
+			myException = e;
+		}
+
+		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
+		System.Assert.areEqual(
+			true,
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_BE_PROVIDED_ERROR),
+			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
+		);
+	}
+
+	@IsTest
+	private static void isBypassedWithNullTypeShouldThrowException() {
+		try {
+			TriggerActionFlow.isBypassed((System.Type) null);
+		} catch (Exception e) {
+			myException = e;
+		}
+
+		System.Assert.areNotEqual(null, myException, EXCEPTION_SHOULD_BE_THROWN);
+		System.Assert.areEqual(
+			true,
+			myException.getMessage()
+				.contains(TriggerActionFlow.TYPE_MUST_BE_PROVIDED_ERROR),
 			EXCEPTION_SHOULD_HAVE_THE_CORRECT_MESSAGE
 		);
 	}

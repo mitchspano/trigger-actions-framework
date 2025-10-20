@@ -19,18 +19,24 @@
  * @description This class implements the TriggerAction interface and provides a framework for
  * executing Flows before or after the insert, update, delete, or undelete of records.
  */
-@SuppressWarnings('PMD.CyclomaticComplexity')
+@SuppressWarnings('PMD.CyclomaticComplexity, PMD.CognitiveComplexity')
 public virtual inherited sharing class TriggerActionFlow implements TriggerAction.BeforeInsert, TriggerAction.AfterInsert, TriggerAction.BeforeUpdate, TriggerAction.AfterUpdate, TriggerAction.BeforeDelete, TriggerAction.AfterDelete, TriggerAction.AfterUndelete {
 	@TestVisible
 	private static final String RECORD_VARIABLE_NOT_FOUND_ERROR = 'There must be a variable defined in this flow with api name of "record" and type of "record" that is marked as "available for output"';
 	@TestVisible
 	private static final String FLOW_INTERVIEW_PREFIX = 'Flow.Interview';
 	@TestVisible
+	private static final String TYPE_MUST_BE_PROVIDED_ERROR = 'Type must be provided to get the flow name.';
+	@TestVisible
+	private static final String TYPE_MUST_REPRESENT_FLOW_ERROR = 'Type must represent a Flow (e.g., Flow.Interview.MyFlow.class), but got: ';
+	@TestVisible
+	private static final String FLOW_DOES_NOT_EXIST_ERROR = 'Flow does not exist. Please check that the flow API name is correct.';
+	@TestVisible
 	private static Set<String> bypassedFlows = new Set<String>();
 	@TestVisible
 	private static InvocableAction invocableAction = new InvocableAction();
 	@TestVisible
-	private static NameExtractor nameExtractor = new NameExtractor();
+	private static TriggerActionFlow.NameExtractor nameExtractor = new TriggerActionFlow.NameExtractor();
 
 	public String flowName;
 	public Boolean allowRecursion;
@@ -112,18 +118,18 @@ public virtual inherited sharing class TriggerActionFlow implements TriggerActio
 	 * @throws IllegalArgumentException if the type does not represent a Flow.
 	 */
 	private static String getFlowNameFromType(System.Type flowType) {
+		if (flowType == null) {
+			throw new IllegalArgumentException(TYPE_MUST_BE_PROVIDED_ERROR);
+		}
 		String typeName = nameExtractor.extractName(flowType);
-		if (!typeName.startsWith(FLOW_INTERVIEW_PREFIX)) {
+		if (typeName == null || !typeName.startsWith(FLOW_INTERVIEW_PREFIX)) {
 			throw new IllegalArgumentException(
-				'Type must represent a Flow (e.g., Flow.Interview.MyFlow.class), but got: ' +
-				typeName
+				TYPE_MUST_REPRESENT_FLOW_ERROR + typeName
 			);
 		}
 		// If the type name is exactly "Flow.Interview", it means the flow doesn't exist
 		if (typeName.equals(FLOW_INTERVIEW_PREFIX)) {
-			throw new IllegalArgumentException(
-				'Flow does not exist. Please check that the flow API name is correct.'
-			);
+			throw new IllegalArgumentException(FLOW_DOES_NOT_EXIST_ERROR);
 		}
 		return typeName.replace(FLOW_INTERVIEW_PREFIX + '.', '');
 	}
