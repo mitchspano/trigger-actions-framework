@@ -15,7 +15,7 @@
  */
 
 @SuppressWarnings(
-	'PMD.ApexDoc, PMD.CyclomaticComplexity, PMD.ApexUnitTestClassShouldHaveRunAs'
+	'PMD.ApexDoc,PMD.CyclomaticComplexity,PMD.ApexUnitTestClassShouldHaveRunAs'
 )
 @IsTest(isParallel=true)
 private class MetadataTriggerHandlerTest {

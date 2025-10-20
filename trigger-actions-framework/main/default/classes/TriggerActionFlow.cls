@@ -19,7 +19,7 @@
  * @description This class implements the TriggerAction interface and provides a framework for
  * executing Flows before or after the insert, update, delete, or undelete of records.
  */
-@SuppressWarnings('PMD.CyclomaticComplexity, PMD.CognitiveComplexity')
+@SuppressWarnings('PMD.CyclomaticComplexity,PMD.CognitiveComplexity')
 public virtual inherited sharing class TriggerActionFlow implements TriggerAction.BeforeInsert, TriggerAction.AfterInsert, TriggerAction.BeforeUpdate, TriggerAction.AfterUpdate, TriggerAction.BeforeDelete, TriggerAction.AfterDelete, TriggerAction.AfterUndelete {
 	@TestVisible
 	private static final String RECORD_VARIABLE_NOT_FOUND_ERROR = 'There must be a variable defined in this flow with api name of "record" and type of "record" that is marked as "available for output"';
@@ -449,6 +449,7 @@ public virtual inherited sharing class TriggerActionFlow implements TriggerActio
 		}
 	}
 
+	@SuppressWarnings('PMD.ApexDoc')
 	@TestVisible
 	private virtual class NameExtractor {
 		public virtual String extractName(System.Type flowType) {

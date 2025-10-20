@@ -76,7 +76,7 @@
  *
  */
 @SuppressWarnings(
-	'PMD.CognitiveComplexity, PMD.StdCyclomaticComplexity, PMD.CyclomaticComplexity'
+	'PMD.CognitiveComplexity,PMD.StdCyclomaticComplexity,PMD.CyclomaticComplexity'
 )
 public inherited sharing class MetadataTriggerHandler extends TriggerBase implements TriggerAction.BeforeInsert, TriggerAction.AfterInsert, TriggerAction.BeforeUpdate, TriggerAction.AfterUpdate, TriggerAction.BeforeDelete, TriggerAction.AfterDelete, TriggerAction.AfterUndelete {
 	private static final String DOUBLE_UNDERSCORE = '__';

@@ -14,7 +14,9 @@
    limitations under the License.
  */
 
-@SuppressWarnings('PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs')
+@SuppressWarnings(
+	'PMD.ApexDoc,PMD.CyclomaticComplexity,PMD.ApexUnitTestClassShouldHaveRunAs'
+)
 @IsTest(isParallel=true)
 private class TriggerBaseTest {
 	private static final String ACCOUNT = 'Account';

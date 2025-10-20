@@ -33,7 +33,7 @@
  * The `TriggerAction` interface defines the methods that should be implemented by trigger actions.
  */
 @SuppressWarnings(
-	'PMD.StdCyclomaticComplexity, PMD.CyclomaticComplexity, PMD.CognitiveComplexity, PMD.PropertyNamingConventions'
+	'PMD.StdCyclomaticComplexity,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.PropertyNamingConventions'
 )
 public inherited sharing virtual class TriggerBase {
 	@TestVisible
@@ -142,7 +142,9 @@ public inherited sharing virtual class TriggerBase {
 	 * @param sObjectType The sObjectType of the object to bypass.
 	 */
 	public static void bypass(Schema.sObjectType sObjectType) {
-		TriggerBase.bypassedObjects.add(sObjectType.getDescribe().getName());
+		TriggerBase.bypassedObjects.add(
+			sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).getName()
+		);
 	}
 
 	/**
@@ -151,7 +153,9 @@ public inherited sharing virtual class TriggerBase {
 	 * @param sObjectType The sObjectType of the object to clear the bypass for.
 	 */
 	public static void clearBypass(Schema.sObjectType sObjectType) {
-		TriggerBase.bypassedObjects.remove(sObjectType.getDescribe().getName());
+		TriggerBase.bypassedObjects.remove(
+			sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).getName()
+		);
 	}
 
 	/**
@@ -162,7 +166,7 @@ public inherited sharing virtual class TriggerBase {
 	 */
 	public static Boolean isBypassed(Schema.sObjectType sObjectType) {
 		return TriggerBase.bypassedObjects.contains(
-			sObjectType.getDescribe().getName()
+			sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).getName()
 		);
 	}
 

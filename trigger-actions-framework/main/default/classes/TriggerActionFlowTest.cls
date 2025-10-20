@@ -15,7 +15,7 @@
  */
 
 @SuppressWarnings(
-	'PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs, PMD.CyclomaticComplexity'
+	'PMD.ApexDoc,PMD.ApexUnitTestClassShouldHaveRunAs,PMD.CyclomaticComplexity'
 )
 @IsTest(isParallel=true)
 private class TriggerActionFlowTest {
@@ -568,6 +568,7 @@ private class TriggerActionFlowTest {
 			this.outputParameters = outputParameters;
 			return this;
 		}
+		@SuppressWarnings('PMD.AvoidBooleanMethodParameters')
 		public InvocableActionResultBuilder setSuccess(Boolean success) {
 			this.success = success;
 			return this;
