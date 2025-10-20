@@ -242,29 +242,35 @@ You can bypass all actions on an sObject as well as specific Apex or Flow action
 
 #### Bypass from Apex
 
-To bypass from Apex, use the static `bypass(String name)` method in the `TriggerBase`, `MetadataTriggerHandler`, or `TriggerActionFlow` classes.
+The framework provides compile-safe bypass methods that accept type references.
+
+**Bypass sObjects using Schema.sObjectType:**
 
 ```java
 public void updateAccountsNoTrigger(List<Account> accountsToUpdate) {
-  TriggerBase.bypass('Account');
+  TriggerBase.bypass(Schema.Account.SObjectType);
   update accountsToUpdate;
-  TriggerBase.clearBypass('Account');
+  TriggerBase.clearBypass(Schema.Account.SObjectType);
 }
 ```
+
+**Bypass Apex classes using System.Type:**
 
 ```java
 public void insertOpportunitiesNoRules(List<Opportunity> opportunitiesToInsert) {
-  MetadataTriggerHandler.bypass('TA_Opportunity_StageInsertRules');
+  MetadataTriggerHandler.bypass(TA_Opportunity_StageInsertRules.class);
   insert opportunitiesToInsert;
-  MetadataTriggerHandler.clearBypass('TA_Opportunity_StageInsertRules');
+  MetadataTriggerHandler.clearBypass(TA_Opportunity_StageInsertRules.class);
 }
 ```
 
+**Bypass Flows using Flow.Interview:**
+
 ```java
 public void updateContactsNoFlow(List<Contacts> contactsToUpdate) {
-  TriggerActionFlow.bypass('Contact_Flow');
+  TriggerActionFlow.bypass(Flow.Interview.Contact_Flow.class);
   update contactsToUpdate;
-  TriggerActionFlow.clearBypass('Contact_Flow');
+  TriggerActionFlow.clearBypass(Flow.Interview.Contact_Flow.class);
 }
 ```
 
@@ -615,3 +621,19 @@ public void execute(FinalizerHandler.Context context) {
   }
 }
 ```
+
+---
+
+## Documentation Generation
+
+This project uses [ApexDocs](https://github.com/cparra/apexdocs) to generate documentation from Apex class comments. To generate the documentation:
+
+```bash
+npx @cparra/apexdocs markdown \
+    -s trigger-actions-framework \
+    -t docs \
+    -p public \
+    -g docsify
+```
+
+The generated documentation will be available in the `docs/` directory and can be viewed using any static site generator or served directly.
