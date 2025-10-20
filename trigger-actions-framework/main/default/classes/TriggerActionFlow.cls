@@ -24,9 +24,13 @@ public virtual inherited sharing class TriggerActionFlow implements TriggerActio
 	@TestVisible
 	private static final String RECORD_VARIABLE_NOT_FOUND_ERROR = 'There must be a variable defined in this flow with api name of "record" and type of "record" that is marked as "available for output"';
 	@TestVisible
+	private static final String FLOW_INTERVIEW_PREFIX = 'Flow.Interview';
+	@TestVisible
 	private static Set<String> bypassedFlows = new Set<String>();
 	@TestVisible
 	private static InvocableAction invocableAction = new InvocableAction();
+	@TestVisible
+	private static NameExtractor nameExtractor = new NameExtractor();
 
 	public String flowName;
 	public Boolean allowRecursion;
@@ -60,10 +64,68 @@ public virtual inherited sharing class TriggerActionFlow implements TriggerActio
 	}
 
 	/**
+	 * @description This method bypasses the execution of the Flow for the specified list of records.
+	 *
+	 * @param flowType The Type of the Flow to bypass (e.g., Flow.Interview.MyFlow.class).
+	 * @throws IllegalArgumentException if the type does not represent a Flow.
+	 */
+	public static void bypass(System.Type flowType) {
+		String flowName = getFlowNameFromType(flowType);
+		TriggerActionFlow.bypassedFlows.add(flowName);
+	}
+
+	/**
+	 * @description This method clears the bypass for the specified list of records.
+	 *
+	 * @param flowType The Type of the Flow to clear the bypass for (e.g., Flow.Interview.MyFlow.class).
+	 * @throws IllegalArgumentException if the type does not represent a Flow.
+	 */
+	public static void clearBypass(System.Type flowType) {
+		String flowName = getFlowNameFromType(flowType);
+		TriggerActionFlow.bypassedFlows.remove(flowName);
+	}
+
+	/**
+	 * @description This method checks if the Flow is bypassed for the specified list of records.
+	 *
+	 * @param flowType The Type of the Flow to check the bypass for (e.g., Flow.Interview.MyFlow.class).
+	 * @return `true` if the Flow is bypassed for the specified list of records, `false` otherwise.
+	 * @throws IllegalArgumentException if the type does not represent a Flow.
+	 */
+	public static Boolean isBypassed(System.Type flowType) {
+		String flowName = getFlowNameFromType(flowType);
+		return TriggerActionFlow.bypassedFlows.contains(flowName);
+	}
+
+	/**
 	 * @description This method clears all bypasses for all Flows.
 	 */
 	public static void clearAllBypasses() {
 		TriggerActionFlow.bypassedFlows.clear();
+	}
+
+	/**
+	 * @description This method extracts the flow name from a Type and validates that it represents a Flow.
+	 *
+	 * @param flowType The Type to extract the flow name from.
+	 * @return The flow API name.
+	 * @throws IllegalArgumentException if the type does not represent a Flow.
+	 */
+	private static String getFlowNameFromType(System.Type flowType) {
+		String typeName = nameExtractor.extractName(flowType);
+		if (!typeName.startsWith(FLOW_INTERVIEW_PREFIX)) {
+			throw new IllegalArgumentException(
+				'Type must represent a Flow (e.g., Flow.Interview.MyFlow.class), but got: ' +
+				typeName
+			);
+		}
+		// If the type name is exactly "Flow.Interview", it means the flow doesn't exist
+		if (typeName.equals(FLOW_INTERVIEW_PREFIX)) {
+			throw new IllegalArgumentException(
+				'Flow does not exist. Please check that the flow API name is correct.'
+			);
+		}
+		return typeName.replace(FLOW_INTERVIEW_PREFIX + '.', '');
 	}
 
 	/**
@@ -378,6 +440,13 @@ public virtual inherited sharing class TriggerActionFlow implements TriggerActio
 			);
 			action.setInvocations(inputs);
 			return action.invoke();
+		}
+	}
+
+	@TestVisible
+	private virtual class NameExtractor {
+		public virtual String extractName(System.Type flowType) {
+			return flowType.getName();
 		}
 	}
 }
