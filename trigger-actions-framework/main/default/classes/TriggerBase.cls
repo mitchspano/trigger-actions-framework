@@ -33,7 +33,7 @@
  * The `TriggerAction` interface defines the methods that should be implemented by trigger actions.
  */
 @SuppressWarnings(
-	'PMD.StdCyclomaticComplexity, PMD.CyclomaticComplexity, PMD.cognitivecomplexity, PMD.PropertyNamingConventions'
+	'PMD.StdCyclomaticComplexity, PMD.CyclomaticComplexity, PMD.CognitiveComplexity, PMD.PropertyNamingConventions'
 )
 public inherited sharing virtual class TriggerBase {
 	@TestVisible
@@ -134,6 +134,36 @@ public inherited sharing virtual class TriggerBase {
 	 */
 	public static Boolean isBypassed(String sObjectName) {
 		return TriggerBase.bypassedObjects.contains(sObjectName);
+	}
+
+	/**
+	 * @description This method bypasses the execution of the specified object.
+	 *
+	 * @param sObjectType The sObjectType of the object to bypass.
+	 */
+	public static void bypass(Schema.sObjectType sObjectType) {
+		TriggerBase.bypassedObjects.add(sObjectType.getDescribe().getName());
+	}
+
+	/**
+	 * @description This method clears the bypass for the specified object.
+	 *
+	 * @param sObjectType The sObjectType of the object to clear the bypass for.
+	 */
+	public static void clearBypass(Schema.sObjectType sObjectType) {
+		TriggerBase.bypassedObjects.remove(sObjectType.getDescribe().getName());
+	}
+
+	/**
+	 * @description This method checks if the specified object is bypassed.
+	 *
+	 * @param sObjectType The sObjectType of the object to check the bypass for.
+	 * @return True if the object is bypassed, false otherwise.
+	 */
+	public static Boolean isBypassed(Schema.sObjectType sObjectType) {
+		return TriggerBase.bypassedObjects.contains(
+			sObjectType.getDescribe().getName()
+		);
 	}
 
 	/**

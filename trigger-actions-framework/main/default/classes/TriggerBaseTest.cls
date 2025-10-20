@@ -296,6 +296,38 @@ private class TriggerBaseTest {
 	}
 
 	@IsTest
+	private static void bypassWithSObjectTypeShouldSucceed() {
+		TriggerBase.bypass(Schema.Account.SObjectType);
+
+		System.Assert.isTrue(
+			TriggerBase.bypassedObjects.contains(ACCOUNT),
+			BYPASSES_SHOULD_BE_CONFIGURED_CORRECTLY
+		);
+	}
+
+	@IsTest
+	private static void clearBypassWithSObjectTypeShouldSucceed() {
+		TriggerBase.bypass(Schema.Account.SObjectType);
+
+		TriggerBase.clearBypass(Schema.Account.SObjectType);
+
+		System.Assert.isFalse(
+			TriggerBase.bypassedObjects.contains(ACCOUNT),
+			BYPASSES_SHOULD_BE_CONFIGURED_CORRECTLY
+		);
+	}
+
+	@IsTest
+	private static void isBypassedWithSObjectTypeShouldSucceed() {
+		TriggerBase.bypass(Schema.Account.SObjectType);
+
+		System.Assert.isTrue(
+			TriggerBase.isBypassed(Schema.Account.SObjectType),
+			BYPASSES_SHOULD_BE_CONFIGURED_CORRECTLY
+		);
+	}
+
+	@IsTest
 	private static void offsetRowsShouldWork() {
 		TriggerBase.offsetExistingDmlRows();
 
