@@ -36,3 +36,8 @@ package-lock.json
 .pmdCache
 
 .sf
+
+# Claude Code files
+CLAUDE.md
+.claude/
+settings.local.json

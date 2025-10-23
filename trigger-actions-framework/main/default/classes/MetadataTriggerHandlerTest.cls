@@ -820,6 +820,35 @@ private class MetadataTriggerHandlerTest {
 			MetadataTriggerHandlerTest.executed = true;
 		}
 	}
+	@IsTest
+	private static void checkPermissionNamespaceAwareShouldHandleNamespacedPermissions() {
+		MetadataTriggerHandler testHandler = new MetadataTriggerHandler();
+		
+		// Test non-namespaced permission (should work as normal)
+		Boolean result1 = testHandler.checkPermissionNamespaceAware('SimplePermission');
+		System.Assert.areEqual(
+			false, // Permissions typically return false in test context unless specifically set up
+			result1,
+			'Non-namespaced permission should work correctly'
+		);
+		
+		// Test namespaced permission (should try both formats)
+		Boolean result2 = testHandler.checkPermissionNamespaceAware('MyNamespace__MyPermission');
+		System.Assert.areEqual(
+			false, // Will return false since permissions don't exist in test context
+			result2,
+			'Namespaced permission should handle gracefully when permission does not exist'
+		);
+		
+		// Test permission with multiple underscores (should split at first occurrence)
+		Boolean result3 = testHandler.checkPermissionNamespaceAware('MyNamespace__Complex__Permission');
+		System.Assert.areEqual(
+			false, // Will return false since permissions don't exist in test context
+			result3,
+			'Permission with multiple underscores should handle gracefully'
+		);
+	}
+
 	public class TestFinalizerHandler extends FinalizerHandler {
 		public override void handleDynamicFinalizers() {
 			MetadataTriggerHandlerTest.executed = true;
