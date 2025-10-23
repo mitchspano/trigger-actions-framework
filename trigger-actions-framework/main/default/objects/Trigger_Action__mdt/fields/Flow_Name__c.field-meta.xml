@@ -4,11 +4,11 @@
     <description
 	>Enter the API name of the flow you would like to execute.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText
 	>Enter the API name of the flow you would like to execute.</inlineHelpText>
     <label>Flow Name</label>
-    <length>255</length>
+    <length>97</length>
     <required>false</required>
     <type>Text</type>
     <unique>false</unique>

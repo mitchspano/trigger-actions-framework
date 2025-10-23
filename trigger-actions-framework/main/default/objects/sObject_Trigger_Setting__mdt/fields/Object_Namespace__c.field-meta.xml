@@ -3,11 +3,11 @@
     <fullName>Object_Namespace__c</fullName>
     <description>Enter the namespace object for this trigger.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText
 	>Enter the namespace object for this trigger.</inlineHelpText>
     <label>Object Namespace</label>
-    <length>255</length>
+    <length>15</length>
     <required>false</required>
     <type>Text</type>
     <unique>false</unique>
