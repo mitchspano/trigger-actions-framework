@@ -202,8 +202,8 @@ public with sharing virtual class FinalizerHandler {
 			DML_Finalizer__mdt first,
 			DML_Finalizer__mdt second
 		) {
-			Integer difference = (first.Order__c - second.Order__c).intValue();
-			return difference < 0 ? difference : difference == 0 ? 0 : 1;
+			Decimal difference = (first.Order__c - second.Order__c);
+			return difference < 0 ? -1 : difference == 0 ? 0 : 1;
 		}
 	}
 
