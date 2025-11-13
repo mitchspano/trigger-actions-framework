@@ -14,21 +14,25 @@
    limitations under the License.
  */
 @IsTest(isParallel=true)
-@SuppressWarnings('PMD.ApexDoc, PMD.ApexUnitTestClassShouldHaveRunAs')
+@SuppressWarnings('PMD.ApexDoc,PMD.ApexUnitTestClassShouldHaveRunAs')
 private with sharing class FinalizerHandlerTest {
 	private static final String ACCOUNT = 'Account';
-	private static final String BAR = 'bar';
 	private static final String BOGUS_CLASS_NAME = 'Bogus';
 	private static final String BYPASS_PERMISSION = 'Bogus_Bypass_Permission';
 	private static final String BYPASSES_SHOULD_BE_CONFIGURED_PROPERLY = 'All bypasses should be configured correctly';
 	private static final String EXCEPTION_SHOULD_BE_THROWN = 'An exception should be thrown';
 	private static final String EXCEPTION_SHOULD_HAVE_CORRECT_MESSAGE = 'The exception should have the correct message';
-	private static final String FOO = 'foo';
 	private static final String REQUIRED_PERMISSION = 'Bogus_Required_Permission';
-	private static final String MY_CLASS = 'FinalizerHandlerTest.MyClass';
-	private static final String TEST_BAR_FINALIZER = 'FinalizerHandlerTest.BarFinalizer';
-	private static final String TEST_FINALIZER_WITH_DML = 'FinalizerHandlerTest.FinalizerWithDml';
-	private static final String TEST_FOO_FINALIZER = 'FinalizerHandlerTest.FooFinalizer';
+	private static final String MY_CLASS = FinalizerHandlerTest.MyClass.class
+		.getName();
+	private static final String TEST_BAR_FINALIZER = FinalizerHandlerTest.BarFinalizer.class
+		.getName();
+	private static final String TEST_BAZ_FINALIZER = FinalizerHandlerTest.BazFinalizer.class
+		.getName();
+	private static final String TEST_FINALIZER_WITH_DML = FinalizerHandlerTest.FinalizerWithDml.class
+		.getName();
+	private static final String TEST_FOO_FINALIZER = FinalizerHandlerTest.FooFinalizer.class
+		.getName();
 
 	private static final Schema.SObjectType SOBJECT_TYPE = Schema.Account.SObjectType;
 	private static final System.TriggerOperation OPERATION = System.TriggerOperation.BEFORE_INSERT;
@@ -67,7 +71,7 @@ private with sharing class FinalizerHandlerTest {
 		handler.handleDynamicFinalizers();
 
 		System.Assert.areEqual(
-			FOO,
+			TEST_FOO_FINALIZER,
 			finalizerLedger[0],
 			'The finalizer should be dynamically instantiated and executed'
 		);
@@ -151,6 +155,10 @@ private with sharing class FinalizerHandlerTest {
 	private static void finalizersShouldExecuteInOrder() {
 		handler.allFinalizers = new List<DML_Finalizer__mdt>{
 			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_BAZ_FINALIZER,
+				Order__c = 3
+			),
+			new DML_Finalizer__mdt(
 				Apex_Class_Name__c = TEST_FOO_FINALIZER,
 				Order__c = 1
 			),
@@ -163,14 +171,19 @@ private with sharing class FinalizerHandlerTest {
 		handler.handleDynamicFinalizers();
 
 		System.Assert.areEqual(
-			FOO,
+			TEST_FOO_FINALIZER,
 			finalizerLedger[0],
 			'The finalizer with the lowest order was not executed first'
 		);
 		System.Assert.areEqual(
-			BAR,
+			TEST_BAR_FINALIZER,
 			finalizerLedger[1],
-			'The finalizer with the highest order was not executed last'
+			'The finalizer with the middle order was not executed last'
+		);
+		System.Assert.areEqual(
+			TEST_BAZ_FINALIZER,
+			finalizerLedger[2],
+			'The finalizer with the highest order was executed last'
 		);
 	}
 
@@ -289,13 +302,19 @@ private with sharing class FinalizerHandlerTest {
 
 	public class FooFinalizer implements TriggerAction.DmlFinalizer {
 		public void execute(FinalizerHandler.Context context) {
-			finalizerLedger.add(FOO);
+			finalizerLedger.add(TEST_FOO_FINALIZER);
 		}
 	}
 
 	public class BarFinalizer implements TriggerAction.DmlFinalizer {
 		public void execute(FinalizerHandler.Context context) {
-			finalizerLedger.add(BAR);
+			finalizerLedger.add(TEST_BAR_FINALIZER);
+		}
+	}
+
+	public class BazFinalizer implements TriggerAction.DmlFinalizer {
+		public void execute(FinalizerHandler.Context context) {
+			finalizerLedger.add(TEST_BAZ_FINALIZER);
 		}
 	}
 

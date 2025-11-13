@@ -4,9 +4,8 @@
 	"version": "1.0.0",
 	"description": "Apex Trigger Actions Framework",
 	"scripts": {
-		"lint": "npm run lint:lwc && npm run lint:aura",
-		"lint:aura": "eslint **/aura/**",
-		"lint:lwc": "eslint **/lwc/**",
+		"lint": "sf code-analyzer run --rule-selector eslint --workspace trigger-actions-framework",
+		"scan": "sf code-analyzer run -r pmd:1 -r pmd:2 -r pmd:3 --workspace trigger-actions-framework/**/*.cls  --workspace trigger-actions-framework/**/*.trigger",
 		"test": "npm run test:unit",
 		"test:unit": "sfdx-lwc-jest",
 		"test:unit:watch": "sfdx-lwc-jest --watch",
@@ -16,16 +15,16 @@
 		"prettier:verify": "prettier --list-different \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,yaml,yml}\""
 	},
 	"devDependencies": {
+		"@lwc/eslint-plugin-lwc": "3.3.0",
 		"@prettier/plugin-xml": "^0.13.1",
-		"@salesforce/eslint-config-lwc": "^0.11.1",
-		"@salesforce/eslint-plugin-aura": "^2.0.0",
-		"@salesforce/sfdx-lwc-jest": "^0.10.4",
-		"eslint": "^7.24.0",
-		"eslint-config-prettier": "^8.1.0",
+		"@salesforce/eslint-config-lwc": "^4.1.1",
+		"@salesforce/eslint-plugin-aura": "^3.0.0",
+		"@salesforce/sfdx-lwc-jest": "^7.1.2",
+		"eslint-config-prettier": "^10.1.8",
 		"husky": "^6.0.0",
 		"lint-staged": "^10.5.4",
-		"prettier": "3.0.2",
-		"prettier-plugin-apex": "2.0.1"
+		"prettier": "3.6.2",
+		"prettier-plugin-apex": "2.2.6"
 	},
 	"husky": {
 		"hooks": {
@@ -34,10 +33,11 @@
 	},
 	"lint-staged": {
 		"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [
-			"prettier --write"
+			"prettier --write",
+			"npm run scan"
 		],
 		"**/{aura|lwc}/**": [
-			"eslint"
+			"npm run lint"
 		]
 	}
 }

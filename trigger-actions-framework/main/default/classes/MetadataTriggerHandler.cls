@@ -371,7 +371,7 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	 * @param requiredPermission The required permission for the Trigger Action.
 	 * @return True if bypassed, false otherwise.
 	 */
-	private static boolean isBypassed(
+	private static Boolean isBypassed(
 		String bypassPermission,
 		String requiredPermission
 	) {

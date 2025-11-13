@@ -98,8 +98,8 @@ public with sharing virtual class FinalizerHandler {
 	 */
 	public virtual void handleDynamicFinalizers() {
 		Context context = new Context();
-		List<DML_Finalizer__mdt> sortedFinalizers = getSortedFinalizers();
-		for (DML_Finalizer__mdt finalizerMetadata : sortedFinalizers) {
+		this.allFinalizers.sort(new FinalizerSorter());
+		for (DML_Finalizer__mdt finalizerMetadata : this.allFinalizers) {
 			if (finalizerMetadata.Bypass_Execution__c) {
 				return;
 			}
@@ -130,14 +130,12 @@ public with sharing virtual class FinalizerHandler {
 		if (FinalizerHandler.isBypassed(className)) {
 			return;
 		}
-		try {
-			dynamicInstance = Type.forName(className).newInstance();
-		} catch (System.NullPointerException e) {
-			handleFinalizerException(INVALID_CLASS_ERROR_FINALIZER, className);
-		}
 		TriggerAction.DmlFinalizer finalizer;
 		try {
+			dynamicInstance = Type.forName(className).newInstance();
 			finalizer = (TriggerAction.DmlFinalizer) dynamicInstance;
+		} catch (System.NullPointerException e) {
+			handleFinalizerException(INVALID_CLASS_ERROR_FINALIZER, className);
 		} catch (System.TypeException e) {
 			handleFinalizerException(INVALID_TYPE_ERROR_FINALIZER, className);
 		}
@@ -146,23 +144,6 @@ public with sharing virtual class FinalizerHandler {
 		if (limits.getDmlStatements() > dmlOperationsBefore) {
 			throw new FinalizerException(DML_IN_FINALIZER_ERROR);
 		}
-	}
-
-	/**
-	 * @description Get the sorted finalizers.
-	 * @return A list of sorted finalizers.
-	 */
-	private List<DML_Finalizer__mdt> getSortedFinalizers() {
-		List<FinalizerSorter> sorters = new List<FinalizerSorter>();
-		for (DML_Finalizer__mdt finalizer : this.allFinalizers) {
-			sorters.add(new FinalizerSorter(finalizer));
-		}
-		List<DML_Finalizer__mdt> results = new List<DML_Finalizer__mdt>();
-		sorters.sort();
-		for (FinalizerSorter sorter : sorters) {
-			results.add(sorter.metadata);
-		}
-		return results;
 	}
 
 	private void handleFinalizerException(String errorFormat, String className) {
@@ -178,7 +159,7 @@ public with sharing virtual class FinalizerHandler {
 	 * @param requiredPermission The required permission for the finalizer.
 	 * @return True if bypassed, false otherwise.
 	 */
-	private boolean isBypassed(
+	private Boolean isBypassed(
 		String bypassPermission,
 		String requiredPermission
 	) {
@@ -202,38 +183,27 @@ public with sharing virtual class FinalizerHandler {
 	@TestVisible
 	private List<DML_Finalizer__mdt> allFinalizers {
 		get {
-			if (allFinalizers == null) {
-				allFinalizers = DML_Finalizer__mdt.getAll().values();
-			}
-			return allFinalizers;
+			this.allFinalizers = this.allFinalizers ??
+				DML_Finalizer__mdt.getAll().values();
+			return this.allFinalizers;
 		}
 		private set;
 	}
 
-	private class FinalizerSorter implements Comparable {
-		public final DML_Finalizer__mdt metadata;
-
-		/**
-		 * @description Constructor that takes a `DML_Finalizer__mdt` object and sets the `metadata` property to
-		 * the value of the `DML_Finalizer__mdt` object.
-		 *
-		 * @param metadata The `DML_Finalizer__mdt` object to set the `metadata` property to.
-		 */
-		public FinalizerSorter(DML_Finalizer__mdt metadata) {
-			this.metadata = metadata;
-		}
-
+	private class FinalizerSorter implements Comparator<DML_Finalizer__mdt> {
 		/**
 		 * @description Compares this `FinalizerSorter` object to another object.
 		 *
-		 * @param other The object to compare this `FinalizerSorter` object to.
-		 * @return A negative integer, zero, or a positive integer as this `FinalizerSorter` object is less than,
-		 *  equal to, or greater than the specified object.
+		 * @param first The DML_Finalizer__mdt in the first position.
+		 * @param second The DML_Finalizer__mdt in the next position.
+		 * @return A negative integer, zero, or a positive integer to move items forward or backwards in the list of DML_Finalizer__mdt.
 		 */
-		public Integer compareTo(Object other) {
-			Decimal difference = (this.metadata.Order__c -
-			((FinalizerSorter) other).metadata.Order__c);
-			return difference < 0 ? -1 : difference == 0 ? 0 : 1;
+		public Integer compare(
+			DML_Finalizer__mdt first,
+			DML_Finalizer__mdt second
+		) {
+			Integer difference = (first.Order__c - second.Order__c).intValue();
+			return difference < 0 ? difference : difference == 0 ? 0 : 1;
 		}
 	}
 

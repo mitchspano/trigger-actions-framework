@@ -14,7 +14,7 @@
    limitations under the License.
 */
 @SuppressWarnings(
-	'PMD.ApexUnitTestClassShouldHaveRunAs, PMD.AvoidGlobalModifier'
+	'PMD.ApexUnitTestClassShouldHaveRunAs,PMD.AvoidGlobalModifier'
 )
 @IsTest(IsParallel=true)
 global class FormulaFilterTest {
