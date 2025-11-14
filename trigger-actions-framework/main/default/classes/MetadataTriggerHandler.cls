@@ -97,7 +97,9 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 			'{0}__r.TriggerRecord_Class_Name__c,',
 			'Allow_Flow_Recursion__c,',
 			'{0}__r.Bypass_Permission__c,',
-			'{0}__r.Required_Permission__c',
+			'{0}__r.Required_Permission__c,',
+			'Enable_Telemetry__c,',
+			'Telemetry_Logger_Class__c',
 			'FROM Trigger_Action__mdt',
 			'WHERE',
 			'{0}__c != NULL',
@@ -261,6 +263,37 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	}
 
 	/**
+	 * @description Check a custom permission with namespace awareness.
+	 * This method attempts to check the permission with the provided name first,
+	 * and if that fails, tries to check without the namespace prefix.
+	 *
+	 * @param permissionName The name of the permission to check
+	 * @return True if the permission is granted, false otherwise
+	 */
+	@TestVisible
+	private Boolean checkPermissionNamespaceAware(String permissionName) {
+		try {
+			if (FeatureManagement.checkPermission(permissionName)) {
+				return true;
+			}
+		} catch (Exception e) {
+		}
+		
+		if (permissionName.contains(DOUBLE_UNDERSCORE)) {
+			List<String> parts = permissionName.split(DOUBLE_UNDERSCORE, 2);
+			if (parts.size() == 2) {
+				String permission = parts[1];
+				try {
+					return FeatureManagement.checkPermission(permission);
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	/**
 	 * @description Populate the permission map.
 	 *
 	 * @param permissionName The name of the permission to check.
@@ -269,7 +302,7 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 		if (permissionName != null && !permissionMap.containsKey(permissionName)) {
 			permissionMap.put(
 				permissionName,
-				FeatureManagement.checkPermission(permissionName)
+				checkPermissionNamespaceAware(permissionName)
 			);
 		}
 	}
@@ -325,6 +358,33 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 		}
 		return sObjectToContextToActions.get(this.sObjectName)
 			.get(relationshipName);
+	}
+
+	/**
+	 * @description Create a telemetry logger instance based on the metadata configuration.
+	 *
+	 * @param triggerMetadata The Trigger Action metadata containing telemetry configuration.
+	 * @return An instance of ITriggerActionTelemetryLogger, or null if telemetry is disabled.
+	 */
+	@TestVisible
+	private ITriggerActionTelemetryLogger createTelemetryLogger(
+		Trigger_Action__mdt triggerMetadata
+	) {
+		if (!triggerMetadata.Enable_Telemetry__c) {
+			return null;
+		}
+		
+		String loggerClassName = triggerMetadata.Telemetry_Logger_Class__c;
+		if (String.isBlank(loggerClassName)) {
+			loggerClassName = 'LimitLogger';
+		}
+		
+		try {
+			return (ITriggerActionTelemetryLogger) Type.forName(loggerClassName).newInstance();
+		} catch (Exception e) {
+			System.debug(LoggingLevel.WARN, 'Failed to create telemetry logger ' + loggerClassName + ': ' + e.getMessage());
+			return new LimitLogger();
+		}
 	}
 
 	/**
@@ -417,6 +477,22 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 				continue;
 			}
 
+			ITriggerActionTelemetryLogger telemetryLogger = createTelemetryLogger(triggerMetadata);
+			Integer recordCount = Math.max(
+				(filtered.triggerOld == null) ? 0 : filtered.triggerOld.size(),
+				(filtered.triggerNew == null) ? 0 : filtered.triggerNew.size()
+			);
+
+			if (telemetryLogger != null) {
+				TelemetryContext startContext = new TelemetryContext();
+				startContext.actionClassName = triggerMetadata.Apex_Class_Name__c;
+				startContext.triggerOperation = String.valueOf(context);
+				startContext.sObjectType = this.sObjectName;
+				startContext.recordCount = recordCount;
+				startContext.phase = TelemetryPhase.START;
+				telemetryLogger.log(startContext);
+			}
+
 			switch on context {
 				when BEFORE_INSERT {
 					((TriggerAction.BeforeInsert) triggerAction)
@@ -446,6 +522,16 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 					((TriggerAction.AfterUndelete) triggerAction)
 						.afterUndelete(filtered.triggerNew);
 				}
+			}
+
+			if (telemetryLogger != null) {
+				TelemetryContext endContext = new TelemetryContext();
+				endContext.actionClassName = triggerMetadata.Apex_Class_Name__c;
+				endContext.triggerOperation = String.valueOf(context);
+				endContext.sObjectType = this.sObjectName;
+				endContext.recordCount = recordCount;
+				endContext.phase = TelemetryPhase.FINISH;
+				telemetryLogger.log(endContext);
 			}
 		}
 	}
