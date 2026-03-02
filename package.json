@@ -2,7 +2,7 @@
 	"name": "apex-trigger-actions-framework",
 	"private": true,
 	"version": "1.0.0",
-	"description": "Apex Trigger Actions Framework",
+	"description": "Trigger Actions Framework",
 	"scripts": {
 		"lint": "sf code-analyzer run --rule-selector eslint --workspace trigger-actions-framework",
 		"scan": "sf code-analyzer run -r pmd:1 -r pmd:2 -r pmd:3 --workspace trigger-actions-framework/**/*.cls  --workspace trigger-actions-framework/**/*.trigger",

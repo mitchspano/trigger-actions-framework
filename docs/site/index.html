@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Trigger Actions Framework</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css"
+		/>
+		<style>
+			:root {
+				--theme-color: #0070d2;
+				--base-font-size: 16px;
+				--cover-background-color: linear-gradient(
+					135deg,
+					#0070d2 0%,
+					#032d60 100%
+				);
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app"></div>
+		<script>
+			window.$docsify = {
+				name: "Trigger Actions Framework",
+				repo: "https://github.com/mitchspano/trigger-actions-framework",
+				homepage: "README.md",
+				loadSidebar: true,
+				loadNavbar: false,
+				subMaxLevel: 3,
+				auto2top: true,
+				coverpage: false,
+				search: {
+					maxAge: 86400000,
+					paths: "auto",
+					placeholder: "Search docs...",
+					noData: "No results found.",
+					depth: 6
+				},
+				copyCode: {
+					buttonText: "Copy",
+					errorText: "Error",
+					successText: "Copied!"
+				},
+				pagination: {
+					previousText: "Previous",
+					nextText: "Next",
+					crossChapter: true
+				}
+			};
+		</script>
+		<!-- Docsify core -->
+		<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+		<!-- Plugins -->
+		<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>
+		<!-- Syntax highlighting -->
+		<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-java.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+	</body>
+</html>

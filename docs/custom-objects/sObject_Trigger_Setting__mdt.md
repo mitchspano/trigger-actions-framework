@@ -1,12 +1,14 @@
-# sObject Trigger Setting
+# SObject Trigger Setting
 
 ## API Name
-`sObject_Trigger_Setting__mdt`
+
+`SObject_Trigger_Setting__mdt`
 
 ## Fields
+
 ### Bypass Execution
 
-Set this to true to bypass all Trigger Actions from being called on this sObject
+Set this to true to bypass all Trigger Actions from being called on this SObject
 
 **API Name**
 
@@ -14,9 +16,10 @@ Set this to true to bypass all Trigger Actions from being called on this sObject
 
 **Type**
 
-*Checkbox*
+_Checkbox_
 
 ---
+
 ### Bypass Permission
 
 Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will be bypassed if the running user has the custom permission identified.
@@ -27,10 +30,12 @@ Optional. Enter the API name of a permission. If this field has a value, then th
 
 **Type**
 
-*Text*
+_Text_
 
 ---
+
 ### Object API Name
+
 **Required**
 
 Enter the API Name of the object for this trigger. If this object is part of a managed package, do not include the prefix.
@@ -41,9 +46,10 @@ Enter the API Name of the object for this trigger. If this object is part of a m
 
 **Type**
 
-*Text*
+_Text_
 
 ---
+
 ### Object Namespace
 
 Enter the namespace object for this trigger.
@@ -54,9 +60,10 @@ Enter the namespace object for this trigger.
 
 **Type**
 
-*Text*
+_Text_
 
 ---
+
 ### Required Permission
 
 Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will only execute if the running user has the custom permission identified.
@@ -67,14 +74,15 @@ Optional. Enter the API name of a permission. If this field has a value, then th
 
 **Type**
 
-*Text*
+_Text_
 
 ---
+
 ### TriggerRecord Class Name
 
 Enter the API name of a global class which extends &#x60;TriggerRecord&#x60; and contains two global properties: &#x60;record&#x60;
-        and &#x60;recordPrior&#x60;. Both of these variables need to match the SObject type for this SObject
-        Trigger Setting record.
+and &#x60;recordPrior&#x60;. Both of these variables need to match the SObject type for this SObject
+Trigger Setting record.
 
 **API Name**
 
@@ -82,4 +90,4 @@ Enter the API name of a global class which extends &#x60;TriggerRecord&#x60; and
 
 **Type**
 
-*Text*
+_Text_

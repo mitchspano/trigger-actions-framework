@@ -1,0 +1,49 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy images into site
+        run: cp -r images docs/site/images
+
+      - name: Copy auto-generated docs into site
+        run: |
+          cp -r docs/trigger-actions-framework docs/site/trigger-actions-framework
+          cp -r docs/custom-objects docs/site/custom-objects
+          cp docs/index.md docs/site/index.md
+          cp docs/contributing.md docs/site/contributing.md
+          cp docs/code-of-conduct.md docs/site/code-of-conduct.md
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -23,6 +23,15 @@ node_modules/
 # Eslint cache
 .eslintcache
 
+# Local docs preview assets (assembled by serve-docs.sh / GitHub Actions)
+docs/images/
+docs/site/images/
+docs/site/trigger-actions-framework/
+docs/site/custom-objects/
+docs/site/index.md
+docs/site/contributing.md
+docs/site/code-of-conduct.md
+
 # MacOS system files
 .DS_Store
 
