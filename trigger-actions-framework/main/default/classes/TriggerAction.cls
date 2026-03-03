@@ -34,6 +34,9 @@
  */
 @SuppressWarnings('PMD.CyclomaticComplexity')
 public class TriggerAction {
+	public TriggerAction() {
+	}
+
 	/**
 	 * @description This interface defines the logic that should be executed before
 	 * a new record is inserted.
