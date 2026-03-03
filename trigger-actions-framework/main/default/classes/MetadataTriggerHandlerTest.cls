@@ -826,6 +826,77 @@ private class MetadataTriggerHandlerTest {
 		}
 	}
 
+	@IsTest
+	private static void testTelemetryLoggerCreation() {
+		Trigger_Action__mdt actionWithTelemetry = new Trigger_Action__mdt(
+			Apex_Class_Name__c = TEST_BEFORE_INSERT,
+			Enable_Telemetry__c = true,
+			Telemetry_Logger_Class__c = 'LimitLogger'
+		);
+		
+		Test.startTest();
+		ITriggerActionTelemetryLogger logger = handler.createTelemetryLogger(actionWithTelemetry);
+		Test.stopTest();
+		
+		System.Assert.isNotNull(logger, 'Telemetry logger should be created when enabled');
+		System.Assert.isTrue(logger instanceof LimitLogger, 'Should create LimitLogger instance');
+	}
+
+	@IsTest
+	private static void testTelemetryLoggerDisabled() {
+		Trigger_Action__mdt actionWithoutTelemetry = new Trigger_Action__mdt(
+			Apex_Class_Name__c = TEST_BEFORE_INSERT,
+			Enable_Telemetry__c = false
+		);
+		
+		Test.startTest();
+		ITriggerActionTelemetryLogger logger = handler.createTelemetryLogger(actionWithoutTelemetry);
+		Test.stopTest();
+		
+		System.Assert.isNull(logger, 'Telemetry logger should be null when disabled');
+	}
+
+	@IsTest
+	private static void testTelemetryLoggerDefaultFallback() {
+		Trigger_Action__mdt actionWithDefaultTelemetry = new Trigger_Action__mdt(
+			Apex_Class_Name__c = TEST_BEFORE_INSERT,
+			Enable_Telemetry__c = true,
+			Telemetry_Logger_Class__c = null
+		);
+		
+		Test.startTest();
+		ITriggerActionTelemetryLogger logger = handler.createTelemetryLogger(actionWithDefaultTelemetry);
+		Test.stopTest();
+		
+		System.Assert.isNotNull(logger, 'Should create default logger when class name is null');
+		System.Assert.isTrue(logger instanceof LimitLogger, 'Should fallback to LimitLogger');
+	}
+
+	@IsTest
+	private static void testTelemetryLoggerInvalidClass() {
+		Trigger_Action__mdt actionWithInvalidTelemetry = new Trigger_Action__mdt(
+			Apex_Class_Name__c = TEST_BEFORE_INSERT,
+			Enable_Telemetry__c = true,
+			Telemetry_Logger_Class__c = 'NonExistentLoggerClass'
+		);
+		
+		Test.startTest();
+		ITriggerActionTelemetryLogger logger = handler.createTelemetryLogger(actionWithInvalidTelemetry);
+		Test.stopTest();
+		
+		System.Assert.isNotNull(logger, 'Should fallback to default logger when invalid class specified');
+		System.Assert.isTrue(logger instanceof LimitLogger, 'Should fallback to LimitLogger for invalid class');
+	}
+
+	@IsTest
+	private static void testCheckPermissionNamespaceAware() {
+		Test.startTest();
+		Boolean result = handler.checkPermissionNamespaceAware('TestPermission');
+		Test.stopTest();
+		
+		System.Assert.isFalse(result, 'Non-existent permission should return false');
+	}
+
 	private class FakeSelector extends MetadataTriggerHandler.Selector {
 		List<SObject> results;
 		public FakeSelector(List<SObject> results) {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Telemetry_Logger_Class__c</fullName>
+    <description>The fully qualified name of the Apex class that implements ITriggerActionTelemetryLogger interface. If not specified, the default LimitLogger will be used when telemetry is enabled.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Optional: Specify a custom telemetry logger class that implements ITriggerActionTelemetryLogger. Leave blank to use the default LimitLogger.</inlineHelpText>
+    <label>Telemetry Logger Class</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
