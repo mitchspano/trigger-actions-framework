@@ -1,5 +1,5 @@
 /*
-   Copyright 2024 Google LLC
+   Copyright 2026 Google LLC
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -12,23 +12,12 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
-
-/**
- * @description An abstract class that provides a base structure for trigger context records.
  */
-@SuppressWarnings('PMD.AvoidGlobalModifier')
-global abstract class TriggerRecord {
-	global TriggerRecord() {
+@IsTest(isParallel=true)
+private class TriggerActionTest {
+	@IsTest
+	private static void shouldBeAbleToConstructTriggerAction() {
+		TriggerAction action = new TriggerAction();
+		System.Assert.isNotNull(action, 'TriggerAction should be constructible.');
 	}
-
-	/**
-	 * @description The new version of the SObject that triggered the current execution context.
-	 */
-	global SObject newSobject;
-
-	/**
-	 * @description The previous version of the SObject that triggered the current execution context.
-	 */
-	global SObject oldSobject;
 }
