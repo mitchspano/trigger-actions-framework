@@ -4,7 +4,7 @@
     <description
 	>Enter the name of the sObject you want to have this action execute on during the before delete context</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText
 	>Enter the name of the sObject you want to have this action execute on during the before delete context</inlineHelpText>
     <label>Before Delete</label>

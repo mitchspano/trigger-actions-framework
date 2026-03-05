@@ -4,11 +4,11 @@
     <description
 	>Enter the API Name of the object for this trigger. If this object is part of a managed package, do not include the prefix.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText
 	>Enter the API Name of the object for this trigger. If this object is part of a managed package, do not include the prefix.</inlineHelpText>
     <label>Object API Name</label>
-    <length>255</length>
+    <length>40</length>
     <required>true</required>
     <type>Text</type>
     <unique>false</unique>

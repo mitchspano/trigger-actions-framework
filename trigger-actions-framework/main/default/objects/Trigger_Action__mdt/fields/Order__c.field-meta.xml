@@ -2,9 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Order__c</fullName>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <label>Order</label>
-    <precision>18</precision>
+    <precision>7</precision>
     <required>true</required>
     <scale>3</scale>
     <type>Number</type>
