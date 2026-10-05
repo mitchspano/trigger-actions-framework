@@ -101,7 +101,7 @@ public with sharing virtual class FinalizerHandler {
 		this.allFinalizers.sort(new FinalizerSorter());
 		for (DML_Finalizer__mdt finalizerMetadata : this.allFinalizers) {
 			if (finalizerMetadata.Bypass_Execution__c) {
-				return;
+				continue;
 			}
 			populatePermissionMap(finalizerMetadata.Bypass_Permission__c);
 			populatePermissionMap(finalizerMetadata.Required_Permission__c);
