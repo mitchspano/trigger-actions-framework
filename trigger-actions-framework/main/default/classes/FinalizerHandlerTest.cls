@@ -96,6 +96,29 @@ private with sharing class FinalizerHandlerTest {
 	}
 
 	@IsTest
+	private static void bypassedFinalizerShouldNotPreventLaterFinalizersFromExecuting() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Bypass_Execution__c = true,
+				Order__c = 1
+			),
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_BAR_FINALIZER,
+				Order__c = 2
+			)
+		};
+
+		handler.handleDynamicFinalizers();
+
+		System.Assert.areEqual(
+			new List<String>{ TEST_BAR_FINALIZER },
+			finalizerLedger,
+			'Only the bypassed finalizer should be skipped; finalizers ordered after it should still execute'
+		);
+	}
+
+	@IsTest
 	private static void staticallyBypassedFinalizerShouldNotExecute() {
 		handler.allFinalizers = new List<DML_Finalizer__mdt>{
 			new DML_Finalizer__mdt(
