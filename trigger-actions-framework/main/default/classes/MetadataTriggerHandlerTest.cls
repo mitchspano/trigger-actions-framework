@@ -26,6 +26,8 @@ private class MetadataTriggerHandlerTest {
 	private static final String BAR_FINALIZER = 'MetadataTriggerHandlerTest.BarFinalizer';
 	private static final String BOGUS_CLASS_NAME = 'Bogus';
 	private static final String BYPASS_PERMISSION = 'Bogus_Bypass_Permission';
+	private static final String BYPASS_PERMISSION_2 = 'Other_Bypass_Permission';
+	private static final String BYPASS_PERMISSION_LIST = ' Bogus_Bypass_Permission,\tOther_Bypass_Permission , ';
 	private static final String BYPASSES_SHOULD_BE_CONFIGURED_PROPERLY = 'All bypasses should be configured correctly';
 	private static final String EXCEPTION_SHOULD_BE_THROWN = 'An exception should be thrown';
 	private static final String EXCEPTION_SHOULD_HAVE_CORRECT_MESSAGE = 'The exception should have the correct message';
@@ -36,6 +38,8 @@ private class MetadataTriggerHandlerTest {
 	private static final String METADATA_SHOULD_BE_POPULATED_PROPERLY = 'The metadata should be populated properly';
 	private static final String MY_ACCOUNT = 'My Account';
 	private static final String REQUIRED_PERMISSION = 'Bogus_Required_Permission';
+	private static final String REQUIRED_PERMISSION_2 = 'Other_Required_Permission';
+	private static final String REQUIRED_PERMISSION_LIST = 'Bogus_Required_Permission ,, Other_Required_Permission\n';
 	private static final String SAMPLE_FLOW_NAME = 'TriggerActionFlowTest';
 	private static final String TEST_AFTER_DELETE = 'MetadataTriggerHandlerTest.TestAfterDelete';
 	private static final String TEST_AFTER_INSERT = 'MetadataTriggerHandlerTest.TestAfterInsert';
@@ -748,6 +752,131 @@ private class MetadataTriggerHandlerTest {
 		handler.beforeInsert(handler.triggerNew);
 
 		System.Assert.isFalse(executed, ACTION_SHOULD_NOT_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldNotExecuteIfUserHasAnyBypassPermissionInListForSObject() {
+		setting.Bypass_Permission__c = BYPASS_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			BYPASS_PERMISSION => false,
+			BYPASS_PERMISSION_2 => true
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isFalse(executed, ACTION_SHOULD_NOT_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldNotExecuteIfUserHasAnyBypassPermissionInListForAction() {
+		action.Bypass_Permission__c = BYPASS_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			BYPASS_PERMISSION => true,
+			BYPASS_PERMISSION_2 => false
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isFalse(executed, ACTION_SHOULD_NOT_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldExecuteIfUserHasNoBypassPermissionInList() {
+		setting.Bypass_Permission__c = BYPASS_PERMISSION_LIST;
+		action.Bypass_Permission__c = BYPASS_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			BYPASS_PERMISSION => false,
+			BYPASS_PERMISSION_2 => false
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldExecuteIfUserHasAnyRequiredPermissionInListForSObject() {
+		setting.Required_Permission__c = REQUIRED_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			REQUIRED_PERMISSION => false,
+			REQUIRED_PERMISSION_2 => true
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldExecuteIfUserHasAnyRequiredPermissionInListForAction() {
+		action.Required_Permission__c = REQUIRED_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			REQUIRED_PERMISSION => true,
+			REQUIRED_PERMISSION_2 => false
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+	}
+
+	@IsTest
+	private static void actionShouldNotExecuteIfUserHasNoRequiredPermissionInList() {
+		setting.Required_Permission__c = REQUIRED_PERMISSION_LIST;
+		action.Required_Permission__c = REQUIRED_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap = new Map<String, Boolean>{
+			REQUIRED_PERMISSION => false,
+			REQUIRED_PERMISSION_2 => false
+		};
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isFalse(executed, ACTION_SHOULD_NOT_EXECUTE);
+	}
+
+	@IsTest
+	private static void permissionMapShouldContainEachTrimmedPermissionInList() {
+		setting.Bypass_Permission__c = BYPASS_PERMISSION_LIST;
+		action.Required_Permission__c = REQUIRED_PERMISSION_LIST;
+		MetadataTriggerHandler.selector = new FakeSelector(
+			new List<SObject>{ action }
+		);
+		MetadataTriggerHandler.permissionMap.clear();
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.areEqual(
+			new Set<String>{
+				BYPASS_PERMISSION,
+				BYPASS_PERMISSION_2,
+				REQUIRED_PERMISSION,
+				REQUIRED_PERMISSION_2
+			},
+			MetadataTriggerHandler.permissionMap.keySet(),
+			'Each permission in the list should be checked once, without surrounding spaces'
+		);
+		System.Assert.isFalse(
+			executed,
+			'Bogus required permissions should not be granted, so the action should not execute'
+		);
 	}
 
 	@IsTest

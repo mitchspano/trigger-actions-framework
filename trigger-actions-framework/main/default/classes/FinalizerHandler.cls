@@ -34,8 +34,8 @@
  * - `Apex_Class_Name__c`: The name of the Apex class that implements the finalizer.
  * - `Order__c`: The order in which the finalizer should be executed.
  * - `Bypass_Execution__c`: A flag that indicates whether or not the finalizer should be bypassed.
- * - `Bypass_Permission__c`: The permission required to bypass the finalizer.
- * - `Required_Permission__c`: The permission required to execute the finalizer.
+ * - `Bypass_Permission__c`: A comma-separated list of custom permissions. The finalizer is bypassed when the running user has any one of them (optional).
+ * - `Required_Permission__c`: A comma-separated list of custom permissions. The finalizer executes only when the running user has any one of them (optional).
  * ---
  * Once you have created the `DML_Finalizer__mdt` Custom Metadata type, you can create finalizers by creating records
  * in the `DML_Finalizer__mdt` object.
@@ -54,6 +54,7 @@ public with sharing virtual class FinalizerHandler {
 	private static final String INVALID_TYPE_ERROR_FINALIZER = 'Please check the DML Finalizer Custom Metadata. The {0} class does not implement the TriggerAction.DmlFinalizer interface.';
 	@TestVisible
 	private static final String INVALID_CLASS_ERROR_FINALIZER = 'Please check the DML Finalizer Custom Metadata. The {0} class does not exist.';
+	private static final String COMMA = ',';
 
 	@TestVisible
 	private static Set<String> bypassedFinalizers = new Set<String>();
@@ -155,29 +156,69 @@ public with sharing virtual class FinalizerHandler {
 	/**
 	 * @description Check if the finalizer is bypassed.
 	 *
-	 * @param bypassPermission The bypass permission for the finalizer.
-	 * @param requiredPermission The required permission for the finalizer.
+	 * The finalizer is bypassed when the running user has any one of the bypass permissions,
+	 * or when required permissions are defined and the running user has none of them.
+	 *
+	 * @param bypassPermissions A comma-separated list of bypass permissions for the finalizer.
+	 * @param requiredPermissions A comma-separated list of required permissions for the finalizer.
 	 * @return True if bypassed, false otherwise.
 	 */
 	private Boolean isBypassed(
-		String bypassPermission,
-		String requiredPermission
+		String bypassPermissions,
+		String requiredPermissions
 	) {
-		return (bypassPermission != null && permissionMap.get(bypassPermission)) ||
-			(requiredPermission != null && !permissionMap.get(requiredPermission));
+		return hasAnyPermission(bypassPermissions) ||
+			(String.isNotBlank(requiredPermissions) &&
+			!hasAnyPermission(requiredPermissions));
 	}
 
 	/**
-	 * @description Populate the permission map.
-	 * @param permissionName The permission name.
+	 * @description Populate the permission map with each permission in a comma-separated list.
+	 * @param permissionNames A comma-separated list of custom permission API names.
 	 */
-	private void populatePermissionMap(String permissionName) {
-		if (permissionName != null && !permissionMap.containsKey(permissionName)) {
-			permissionMap.put(
-				permissionName,
-				FeatureManagement.checkPermission(permissionName)
-			);
+	private void populatePermissionMap(String permissionNames) {
+		for (String permissionName : splitPermissions(permissionNames)) {
+			if (!permissionMap.containsKey(permissionName)) {
+				permissionMap.put(
+					permissionName,
+					FeatureManagement.checkPermission(permissionName)
+				);
+			}
 		}
+	}
+
+	/**
+	 * @description Split a comma-separated list of permission names into non-blank names. All whitespace is removed first, so names may be separated by a comma or a comma and a space.
+	 * @param permissionNames A comma-separated list of custom permission API names.
+	 * @return The list of individual permission names. Empty when the input is blank.
+	 */
+	private static List<String> splitPermissions(String permissionNames) {
+		List<String> result = new List<String>();
+		if (String.isBlank(permissionNames)) {
+			return result;
+		}
+		for (
+			String permissionName : permissionNames.deleteWhitespace().split(COMMA)
+		) {
+			if (String.isNotBlank(permissionName)) {
+				result.add(permissionName);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @description Check if the running user has any one permission in a comma-separated list.
+	 * @param permissionNames A comma-separated list of custom permission API names.
+	 * @return True if the user has at least one of the permissions, false otherwise.
+	 */
+	private static Boolean hasAnyPermission(String permissionNames) {
+		for (String permissionName : splitPermissions(permissionNames)) {
+			if (permissionMap.get(permissionName) == true) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@TestVisible

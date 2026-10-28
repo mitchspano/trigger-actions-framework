@@ -19,10 +19,14 @@ private with sharing class FinalizerHandlerTest {
 	private static final String ACCOUNT = 'Account';
 	private static final String BOGUS_CLASS_NAME = 'Bogus';
 	private static final String BYPASS_PERMISSION = 'Bogus_Bypass_Permission';
+	private static final String BYPASS_PERMISSION_2 = 'Other_Bypass_Permission';
+	private static final String BYPASS_PERMISSION_LIST = ' Bogus_Bypass_Permission,\tOther_Bypass_Permission , ';
 	private static final String BYPASSES_SHOULD_BE_CONFIGURED_PROPERLY = 'All bypasses should be configured correctly';
 	private static final String EXCEPTION_SHOULD_BE_THROWN = 'An exception should be thrown';
 	private static final String EXCEPTION_SHOULD_HAVE_CORRECT_MESSAGE = 'The exception should have the correct message';
 	private static final String REQUIRED_PERMISSION = 'Bogus_Required_Permission';
+	private static final String REQUIRED_PERMISSION_2 = 'Other_Required_Permission';
+	private static final String REQUIRED_PERMISSION_LIST = 'Bogus_Required_Permission ,, Other_Required_Permission\n';
 	private static final String MY_CLASS = FinalizerHandlerTest.MyClass.class
 		.getName();
 	private static final String TEST_BAR_FINALIZER = FinalizerHandlerTest.BarFinalizer.class
@@ -148,6 +152,118 @@ private with sharing class FinalizerHandlerTest {
 		System.Assert.isTrue(
 			finalizerLedger.isEmpty(),
 			'The finalizer should be dynamically instantiated, but no action should be taken because the user does not have the required permission'
+		);
+	}
+
+	@IsTest
+	private static void userWithAnyBypassPermissionInListShouldNotExecute() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Bypass_Permission__c = BYPASS_PERMISSION_LIST,
+				Order__c = 1
+			)
+		};
+
+		FinalizerHandler.permissionMap.put(BYPASS_PERMISSION, false);
+		FinalizerHandler.permissionMap.put(BYPASS_PERMISSION_2, true);
+		handler.handleDynamicFinalizers();
+
+		System.Assert.isTrue(
+			finalizerLedger.isEmpty(),
+			'The finalizer should not execute because the user has one of the bypass permissions in the list'
+		);
+	}
+
+	@IsTest
+	private static void userWithNoBypassPermissionInListShouldExecute() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Bypass_Permission__c = BYPASS_PERMISSION_LIST,
+				Order__c = 1
+			)
+		};
+
+		FinalizerHandler.permissionMap.put(BYPASS_PERMISSION, false);
+		FinalizerHandler.permissionMap.put(BYPASS_PERMISSION_2, false);
+		handler.handleDynamicFinalizers();
+
+		System.Assert.areEqual(
+			TEST_FOO_FINALIZER,
+			finalizerLedger[0],
+			'The finalizer should execute because the user has none of the bypass permissions in the list'
+		);
+	}
+
+	@IsTest
+	private static void userWithAnyRequiredPermissionInListShouldExecute() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Required_Permission__c = REQUIRED_PERMISSION_LIST,
+				Order__c = 1
+			)
+		};
+
+		FinalizerHandler.permissionMap.put(REQUIRED_PERMISSION, false);
+		FinalizerHandler.permissionMap.put(REQUIRED_PERMISSION_2, true);
+		handler.handleDynamicFinalizers();
+
+		System.Assert.areEqual(
+			TEST_FOO_FINALIZER,
+			finalizerLedger[0],
+			'The finalizer should execute because the user has one of the required permissions in the list'
+		);
+	}
+
+	@IsTest
+	private static void userWithNoRequiredPermissionInListShouldNotExecute() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Required_Permission__c = REQUIRED_PERMISSION_LIST,
+				Order__c = 1
+			)
+		};
+
+		FinalizerHandler.permissionMap.put(REQUIRED_PERMISSION, false);
+		FinalizerHandler.permissionMap.put(REQUIRED_PERMISSION_2, false);
+		handler.handleDynamicFinalizers();
+
+		System.Assert.isTrue(
+			finalizerLedger.isEmpty(),
+			'The finalizer should not execute because the user has none of the required permissions in the list'
+		);
+	}
+
+	@IsTest
+	private static void permissionMapShouldContainEachTrimmedPermissionInList() {
+		handler.allFinalizers = new List<DML_Finalizer__mdt>{
+			new DML_Finalizer__mdt(
+				Apex_Class_Name__c = TEST_FOO_FINALIZER,
+				Bypass_Permission__c = BYPASS_PERMISSION_LIST,
+				Required_Permission__c = REQUIRED_PERMISSION_LIST,
+				Order__c = 1
+			)
+		};
+
+		FinalizerHandler.permissionMap.clear();
+		handler.handleDynamicFinalizers();
+
+		System.Assert.areEqual(
+			new Set<String>{
+				BYPASS_PERMISSION,
+				BYPASS_PERMISSION_2,
+				REQUIRED_PERMISSION,
+				REQUIRED_PERMISSION_2
+			},
+			FinalizerHandler.permissionMap.keySet(),
+			'Each permission in the list should be checked once, without surrounding spaces'
+		);
+		System.Assert.isTrue(
+			finalizerLedger.isEmpty(),
+			'Bogus required permissions should not be granted, so the finalizer should not execute'
 		);
 	}
 

@@ -37,8 +37,8 @@
  * - `Apex_Class_Name__c`: The name of the Apex class that implements the Trigger Action.
  * - `Order__c`: The order in which the Trigger Action should be executed.
  * - `Flow_Name__c`: The name of the Flow to execute (optional).
- * - `Bypass_Permission__c`: The permission required to bypass the Trigger Action (optional).
- * - `Required_Permission__c`: The permission required to execute the Trigger Action (optional).
+ * - `Bypass_Permission__c`: A comma-separated list of custom permissions. The Trigger Action is bypassed when the running user has any one of them (optional).
+ * - `Required_Permission__c`: A comma-separated list of custom permissions. The Trigger Action executes only when the running user has any one of them (optional).
  * - `Allow_Flow_Recursion__c`: Whether or not to allow the Flow to recurse (optional).
  * ---
  *
@@ -47,8 +47,8 @@
  *
  * Each sObject Trigger Setting must specify the following information:
  *
- * - `Bypass_Permission__c`: The permission required to bypass the Trigger Action for the specified sObject (optional).
- * - `Required_Permission__c`: The permission required to execute the Trigger Action for the specified sObject (optional).
+ * - `Bypass_Permission__c`: A comma-separated list of custom permissions. All Trigger Actions for the specified sObject are bypassed when the running user has any one of them (optional).
+ * - `Required_Permission__c`: A comma-separated list of custom permissions. Trigger Actions for the specified sObject execute only when the running user has any one of them (optional).
  * ---
  *
  * To use the `MetadataTriggerHandler` class, you must create a Trigger on the desired sObject and specify the
@@ -79,6 +79,7 @@
 	'PMD.CognitiveComplexity,PMD.StdCyclomaticComplexity,PMD.CyclomaticComplexity'
 )
 public inherited sharing class MetadataTriggerHandler extends TriggerBase implements TriggerAction.BeforeInsert, TriggerAction.AfterInsert, TriggerAction.BeforeUpdate, TriggerAction.AfterUpdate, TriggerAction.BeforeDelete, TriggerAction.AfterDelete, TriggerAction.AfterUndelete {
+	private static final String COMMA = ',';
 	private static final String DOUBLE_UNDERSCORE = '__';
 	private static final String EMPTY_STRING = '';
 	@TestVisible
@@ -261,17 +262,55 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	}
 
 	/**
-	 * @description Populate the permission map.
+	 * @description Populate the permission map with each permission in a comma-separated list.
 	 *
-	 * @param permissionName The name of the permission to check.
+	 * @param permissionNames A comma-separated list of custom permission API names.
 	 */
-	private void populatePermissionMap(String permissionName) {
-		if (permissionName != null && !permissionMap.containsKey(permissionName)) {
-			permissionMap.put(
-				permissionName,
-				FeatureManagement.checkPermission(permissionName)
-			);
+	private void populatePermissionMap(String permissionNames) {
+		for (String permissionName : splitPermissions(permissionNames)) {
+			if (!permissionMap.containsKey(permissionName)) {
+				permissionMap.put(
+					permissionName,
+					FeatureManagement.checkPermission(permissionName)
+				);
+			}
 		}
+	}
+
+	/**
+	 * @description Split a comma-separated list of permission names into non-blank names. All whitespace is removed first, so names may be separated by a comma or a comma and a space.
+	 *
+	 * @param permissionNames A comma-separated list of custom permission API names.
+	 * @return The list of individual permission names. Empty when the input is blank.
+	 */
+	private static List<String> splitPermissions(String permissionNames) {
+		List<String> result = new List<String>();
+		if (String.isBlank(permissionNames)) {
+			return result;
+		}
+		for (
+			String permissionName : permissionNames.deleteWhitespace().split(COMMA)
+		) {
+			if (String.isNotBlank(permissionName)) {
+				result.add(permissionName);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @description Check if the running user has any one permission in a comma-separated list.
+	 *
+	 * @param permissionNames A comma-separated list of custom permission API names.
+	 * @return True if the user has at least one of the permissions, false otherwise.
+	 */
+	private static Boolean hasAnyPermission(String permissionNames) {
+		for (String permissionName : splitPermissions(permissionNames)) {
+			if (permissionMap.get(permissionName) == true) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -367,16 +406,20 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	/**
 	 * @description Check if the Trigger Action or SObject is bypassed.
 	 *
-	 * @param bypassPermission The bypass permission for the Trigger Action.
-	 * @param requiredPermission The required permission for the Trigger Action.
+	 * The Trigger Action is bypassed when the running user has any one of the bypass permissions,
+	 * or when required permissions are defined and the running user has none of them.
+	 *
+	 * @param bypassPermissions A comma-separated list of bypass permissions for the Trigger Action.
+	 * @param requiredPermissions A comma-separated list of required permissions for the Trigger Action.
 	 * @return True if bypassed, false otherwise.
 	 */
 	private static Boolean isBypassed(
-		String bypassPermission,
-		String requiredPermission
+		String bypassPermissions,
+		String requiredPermissions
 	) {
-		return (bypassPermission != null && permissionMap.get(bypassPermission)) ||
-			(requiredPermission != null && !permissionMap.get(requiredPermission));
+		return hasAnyPermission(bypassPermissions) ||
+			(String.isNotBlank(requiredPermissions) &&
+			!hasAnyPermission(requiredPermissions));
 	}
 
 	/**

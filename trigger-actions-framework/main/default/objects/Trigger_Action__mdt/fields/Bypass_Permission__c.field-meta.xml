@@ -2,11 +2,11 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Bypass_Permission__c</fullName>
     <description
-	>Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will be bypassed if the running user has the custom permission identified.</description>
+	>Optional. Enter the API names of one or more custom permissions, separated by commas. If this field has a value, then this trigger action will be bypassed if the running user has any one of the custom permissions identified.</description>
     <externalId>false</externalId>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText
-	>Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will be bypassed if the running user has the custom permission identified.</inlineHelpText>
+	>Optional. Enter the API names of one or more custom permissions, separated by commas. If this field has a value, then this trigger action will be bypassed if the running user has any one of the custom permissions identified.</inlineHelpText>
     <label>Bypass Permission</label>
     <length>255</length>
     <required>false</required>
