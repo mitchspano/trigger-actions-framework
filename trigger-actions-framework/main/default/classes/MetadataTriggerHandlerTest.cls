@@ -59,6 +59,7 @@ private class MetadataTriggerHandlerTest {
 	private static Boolean executed = false;
 	private static Exception myException;
 	private static Trigger_Action__mdt action = new Trigger_Action__mdt(
+		Id = TriggerTestUtility.getFakeId(Schema.Trigger_Action__mdt.SObjectType),
 		Apex_Class_Name__c = TEST_BEFORE_INSERT,
 		Before_Insert__r = setting,
 		Before_Insert__c = setting.Id,
@@ -751,6 +752,142 @@ private class MetadataTriggerHandlerTest {
 	}
 
 	@IsTest
+	private static void noEntryCriteriaShouldNotBeQueried() {
+		FakeSelector fakeSelector = useFakeSelector(
+			new List<Trigger_Action__mdt>{ action }
+		);
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+		System.Assert.areEqual(
+			1,
+			fakeSelector.getInstanceCalls,
+			'The custom metadata cache should be checked for entry criteria'
+		);
+		System.Assert.areEqual(
+			0,
+			fakeSelector.queryEntryCriteriaCalls,
+			'Actions without entry criteria should not be queried'
+		);
+	}
+
+	@IsTest
+	private static void shortEntryCriteriaShouldNotBeQueried() {
+		action.Entry_Criteria__c = 'record.Name = "Not ' + MY_ACCOUNT + '"';
+		FakeSelector fakeSelector = useFakeSelector(
+			new List<Trigger_Action__mdt>{ action }
+		);
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isFalse(executed, ACTION_SHOULD_NOT_EXECUTE);
+		System.Assert.areEqual(
+			1,
+			fakeSelector.getInstanceCalls,
+			'The entry criteria should be read from the custom metadata cache'
+		);
+		System.Assert.areEqual(
+			0,
+			fakeSelector.queryEntryCriteriaCalls,
+			'Entry criteria shorter than 255 characters should not be queried'
+		);
+	}
+
+	@IsTest
+	private static void longEntryCriteriaShouldBeQueriedOnceForAllActions() {
+		action.Entry_Criteria__c =
+			'record.Name = "' +
+			MY_ACCOUNT +
+			'" || record.Name = "' +
+			'x'.repeat(MetadataTriggerHandler.CACHED_LONG_TEXT_LENGTH) +
+			'"';
+		Trigger_Action__mdt secondAction = action.clone();
+		secondAction.Id = TriggerTestUtility.getFakeId(
+			Schema.Trigger_Action__mdt.SObjectType
+		);
+		FakeSelector fakeSelector = useFakeSelector(
+			new List<Trigger_Action__mdt>{ action, secondAction }
+		);
+
+		handler.beforeInsert(handler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+		System.Assert.areEqual(
+			1,
+			fakeSelector.queryEntryCriteriaCalls,
+			'All possibly truncated entry criteria should be queried together'
+		);
+		System.Assert.areEqual(
+			new Set<Id>{ action.Id, secondAction.Id },
+			fakeSelector.queriedIds,
+			'Every possibly truncated entry criteria should be queried'
+		);
+	}
+
+	@IsTest
+	private static void entryCriteriaShouldBeResolvedOncePerTransaction() {
+		action.Entry_Criteria__c = 'record.Name = "' + MY_ACCOUNT + '"';
+		FakeSelector fakeSelector = useFakeSelector(
+			new List<Trigger_Action__mdt>{ action }
+		);
+
+		handler.beforeInsert(handler.triggerNew);
+		MetadataTriggerHandler secondHandler = new MetadataTriggerHandler();
+		secondHandler.triggerNew = handler.triggerNew;
+		secondHandler.beforeInsert(secondHandler.triggerNew);
+
+		System.Assert.isTrue(executed, ACTION_SHOULD_EXECUTE);
+		System.Assert.areEqual(
+			1,
+			fakeSelector.getInstanceCalls,
+			'Entry criteria should only be resolved once per transaction'
+		);
+	}
+
+	@IsTest
+	private static void selectorShouldQueryEntryCriteria() {
+		Id actionId = TriggerTestUtility.getFakeId(
+			Schema.Trigger_Action__mdt.SObjectType
+		);
+		Integer queriesBefore = Limits.getQueries();
+
+		List<Trigger_Action__mdt> result = new MetadataTriggerHandler.Selector()
+			.queryEntryCriteria(new Set<Id>{ actionId });
+
+		System.Assert.isTrue(
+			result.isEmpty(),
+			'No Trigger Action should be returned for an unknown Id'
+		);
+		System.Assert.areEqual(
+			queriesBefore + 1,
+			Limits.getQueries(),
+			'Selecting a long text area field from custom metadata should count against the SOQL query limit'
+		);
+	}
+
+	@IsTest
+	private static void selectorShouldGetCustomMetadataInstance() {
+		Id actionId = TriggerTestUtility.getFakeId(
+			Schema.Trigger_Action__mdt.SObjectType
+		);
+		Integer queriesBefore = Limits.getQueries();
+
+		Trigger_Action__mdt result = new MetadataTriggerHandler.Selector()
+			.getCustomMetadataInstance(actionId);
+
+		System.Assert.isNull(
+			result,
+			'No Trigger Action should be returned for an unknown Id'
+		);
+		System.Assert.areEqual(
+			queriesBefore,
+			Limits.getQueries(),
+			'Reading from the custom metadata cache should not count against the SOQL query limit'
+		);
+	}
+
+	@IsTest
 	private static void theFrameworkShouldSupportSObjectsFromManagedPackages() {
 		handler.sObjectName = 'Acme__Explosives__c';
 
@@ -777,6 +914,16 @@ private class MetadataTriggerHandlerTest {
 		}
 
 		System.Assert.areEqual(null, myException, EXCEPTION_SHOULD_NOT_BE_THROWN);
+	}
+
+	private static FakeSelector useFakeSelector(
+		List<Trigger_Action__mdt> actions
+	) {
+		setting.TriggerRecord_Class_Name__c = FormulaFilterTest.AccountTriggerRecord.class
+			.getName();
+		FakeSelector result = new FakeSelector(actions);
+		MetadataTriggerHandler.selector = result;
+		return result;
 	}
 
 	public class TestBeforeInsert implements TriggerAction.BeforeInsert {
@@ -826,13 +973,54 @@ private class MetadataTriggerHandlerTest {
 		}
 	}
 
+	/**
+	 * Returns the given actions from the main query, simulates the custom metadata cache
+	 * truncating long text area fields to 255 characters, and counts how often each
+	 * data access method is called.
+	 */
 	private class FakeSelector extends MetadataTriggerHandler.Selector {
 		List<SObject> results;
+		Map<Id, String> idToFullEntryCriteria = new Map<Id, String>();
+		Integer getInstanceCalls = 0;
+		Integer queryEntryCriteriaCalls = 0;
+		Set<Id> queriedIds;
+
 		public FakeSelector(List<SObject> results) {
 			this.results = results;
+			for (SObject result : results) {
+				Trigger_Action__mdt action = (Trigger_Action__mdt) result;
+				this.idToFullEntryCriteria.put(action.Id, action.Entry_Criteria__c);
+			}
 		}
+
 		public override List<SObject> query(String queryString) {
 			return this.results;
+		}
+
+		public override Trigger_Action__mdt getCustomMetadataInstance(Id actionId) {
+			this.getInstanceCalls++;
+			return new Trigger_Action__mdt(
+				Id = actionId,
+				Entry_Criteria__c = this.idToFullEntryCriteria.get(actionId)
+					?.left(MetadataTriggerHandler.CACHED_LONG_TEXT_LENGTH)
+			);
+		}
+
+		public override List<Trigger_Action__mdt> queryEntryCriteria(
+			Set<Id> actionIds
+		) {
+			this.queryEntryCriteriaCalls++;
+			this.queriedIds = actionIds;
+			List<Trigger_Action__mdt> result = new List<Trigger_Action__mdt>();
+			for (Id actionId : actionIds) {
+				result.add(
+					new Trigger_Action__mdt(
+						Id = actionId,
+						Entry_Criteria__c = this.idToFullEntryCriteria.get(actionId)
+					)
+				);
+			}
+			return result;
 		}
 	}
 }

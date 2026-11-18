@@ -87,13 +87,13 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	private static final String INVALID_CLASS_ERROR = 'Please check the Trigger Action Custom Metadata for the {1} context on the {2} sObject. The {0} class does not exist.';
 	private static final String QUERY_TEMPLATE = String.join(
 		new List<String>{
-			'SELECT Apex_Class_Name__c,',
+			'SELECT Id,',
+			'Apex_Class_Name__c,',
 			'DeveloperName,',
 			'Order__c,',
 			'Flow_Name__c,',
 			'Bypass_Permission__c,',
 			'Required_Permission__c,',
-			'Entry_Criteria__c,',
 			'{0}__r.TriggerRecord_Class_Name__c,',
 			'Allow_Flow_Recursion__c,',
 			'{0}__r.Bypass_Permission__c,',
@@ -110,6 +110,8 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 		' '
 	);
 	private static final String RELATIONSHIP_SUFFIX = '__r';
+	@TestVisible
+	private static final Integer CACHED_LONG_TEXT_LENGTH = 255;
 	@TestVisible
 	private static Set<String> bypassedActions = new Set<String>();
 	@TestVisible
@@ -319,12 +321,46 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 					result.add(actionMetadata);
 				}
 			}
+			this.populateEntryCriteria(result);
 
 			sObjectToContextToActions.get(this.sObjectName)
 				.put(relationshipName, result);
 		}
 		return sObjectToContextToActions.get(this.sObjectName)
 			.get(relationshipName);
+	}
+
+	/**
+	 * @description Populate `Entry_Criteria__c` on the given actions.
+	 *
+	 * The main query omits this long text area field because selecting it makes a custom
+	 * metadata query count against SOQL governor limits. Instead, `getInstance()` provides
+	 * the first 255 characters without a query, and only values which may have been
+	 * truncated are queried, in a single SOQL statement.
+	 *
+	 * @param actions The actions to populate.
+	 */
+	private void populateEntryCriteria(List<Trigger_Action__mdt> actions) {
+		Map<Id, Trigger_Action__mdt> idToActionThatNeedsExpandedEntryCriteria = new Map<Id, Trigger_Action__mdt>();
+		for (Trigger_Action__mdt action : actions) {
+			String prefix = selector.getCustomMetadataInstance(action.Id)
+				?.Entry_Criteria__c;
+			action.Entry_Criteria__c = prefix;
+			if (prefix != null && prefix.length() >= CACHED_LONG_TEXT_LENGTH) {
+				idToActionThatNeedsExpandedEntryCriteria.put(action.Id, action);
+			}
+		}
+		if (idToActionThatNeedsExpandedEntryCriteria.isEmpty()) {
+			return;
+		}
+		for (
+			Trigger_Action__mdt full : selector.queryEntryCriteria(
+				idToActionThatNeedsExpandedEntryCriteria.keySet()
+			)
+		) {
+			idToActionThatNeedsExpandedEntryCriteria.get(full.Id)
+				.Entry_Criteria__c = full.Entry_Criteria__c;
+		}
 	}
 
 	/**
@@ -734,6 +770,35 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 		 */
 		public virtual List<SObject> query(String queryString) {
 			return Database.query(queryString);
+		}
+
+		/**
+		 * @description Query the full entry criteria for the given Trigger Actions. Because this
+		 * selects a long text area field, it counts against SOQL governor limits.
+		 *
+		 * @param actionIds The Ids of the Trigger Actions.
+		 * @return The Trigger Actions with `Entry_Criteria__c` populated.
+		 */
+		public virtual List<Trigger_Action__mdt> queryEntryCriteria(
+			Set<Id> actionIds
+		) {
+			return [
+				SELECT Id, Entry_Criteria__c
+				FROM Trigger_Action__mdt
+				WHERE Id IN :actionIds
+				WITH SYSTEM_MODE
+			];
+		}
+
+		/**
+		 * @description Get a Trigger Action from the custom metadata cache, without a SOQL query.
+		 * Long text area fields are truncated to 255 characters.
+		 *
+		 * @param actionId The Id of the Trigger Action.
+		 * @return The Trigger Action, or null if it does not exist.
+		 */
+		public virtual Trigger_Action__mdt getCustomMetadataInstance(Id actionId) {
+			return Trigger_Action__mdt.getInstance(actionId);
 		}
 	}
 
