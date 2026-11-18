@@ -31,7 +31,7 @@ jobs:
         uses: mitchspano/sfdx-scan-pull-request@v0.1.16
         with:
           severity-threshold: 4
-          report-mode: comments
+          report-mode: ${{ github.event.pull_request.head.repo.fork && 'check-runs' || 'comments' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
