@@ -1,7 +1,7 @@
 # Trigger Actions Framework
 
-[![Install (Production)](https://img.shields.io/badge/Install-Production-blue)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tKY000000R0yHYAS)
-[![Install (Sandbox)](https://img.shields.io/badge/Install-Sandbox-lightblue)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tKY000000R0yHYAS)
+[![Install (Production)](https://img.shields.io/badge/Install-Production-blue)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000giHZAAY)
+[![Install (Sandbox)](https://img.shields.io/badge/Install-Sandbox-lightblue)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000giHZAAY)
 
 The **Trigger Actions Framework** allows developers and administrators to partition, order, and bypass record-triggered automations for applications built on Salesforce.com.
 
