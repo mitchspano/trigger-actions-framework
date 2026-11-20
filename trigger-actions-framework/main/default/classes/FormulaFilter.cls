@@ -73,7 +73,10 @@ global class FormulaFilter {
 		List<SObject> triggerNew,
 		List<SObject> triggerOld
 	) {
-		FormulaFilter.Result result = new FormulaFilter.Result();
+		FormulaFilter.Result result = new FormulaFilter.Result(
+			triggerNew,
+			triggerOld
+		);
 		String entryCriteriaFormula = this.triggerActionConfiguration
 			?.Entry_Criteria__c;
 
@@ -199,9 +202,18 @@ global class FormulaFilter {
 		 */
 		public List<SObject> triggerOld;
 
-		private Result() {
-			this.triggerNew = new List<SObject>();
-			this.triggerOld = new List<SObject>();
+		private Result(List<SObject> triggerNew, List<SObject> triggerOld) {
+			this.triggerNew = emptyCopyOf(triggerNew);
+			this.triggerOld = emptyCopyOf(triggerOld);
+		}
+
+		private List<SObject> emptyCopyOf(List<SObject> records) {
+			if (records == null) {
+				return new List<SObject>();
+			}
+			List<SObject> response = records.clone();
+			response.clear();
+			return response;
 		}
 	}
 }

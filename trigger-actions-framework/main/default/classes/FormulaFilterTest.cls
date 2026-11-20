@@ -354,6 +354,67 @@ global class FormulaFilterTest {
 		);
 	}
 
+	@IsTest
+	private static void filteredListsShouldRetainOriginalListType() {
+		configuration.Entry_Criteria__c = 'record.Name = "Test Account 1"';
+		FormulaFilter filter = new FormulaFilter(
+			configuration,
+			TriggerOperation.BEFORE_UPDATE,
+			ACCOUNT_SOBJECT_NAME
+		);
+
+		FormulaFilter.Result result = filter.filterByEntryCriteria(
+			triggerNew,
+			triggerOld
+		);
+
+		System.Assert.isInstanceOfType(
+			result.triggerNew,
+			List<Account>.class,
+			'The filtered triggerNew should retain the original List<Account> type'
+		);
+		System.Assert.isInstanceOfType(
+			result.triggerOld,
+			List<Account>.class,
+			'The filtered triggerOld should retain the original List<Account> type'
+		);
+		System.Assert.areEqual(
+			Schema.Account.SObjectType,
+			result.triggerNew.getSObjectType(),
+			'getSObjectType on the filtered triggerNew should return Account'
+		);
+		System.Assert.areEqual(
+			Schema.Account.SObjectType,
+			result.triggerOld.getSObjectType(),
+			'getSObjectType on the filtered triggerOld should return Account'
+		);
+	}
+
+	@IsTest
+	private static void filteredListsShouldRetainTypeWhenNoRecordsMatch() {
+		configuration.Entry_Criteria__c = 'record.Name = "FooBar"';
+		FormulaFilter filter = new FormulaFilter(
+			configuration,
+			TriggerOperation.BEFORE_UPDATE,
+			ACCOUNT_SOBJECT_NAME
+		);
+
+		FormulaFilter.Result result = filter.filterByEntryCriteria(
+			triggerNew,
+			triggerOld
+		);
+
+		System.Assert.isTrue(
+			result.triggerNew.isEmpty(),
+			'triggerNew should be empty'
+		);
+		System.Assert.areEqual(
+			Schema.Account.SObjectType,
+			result.triggerNew.getSObjectType(),
+			'getSObjectType on an empty filtered triggerNew should still return Account'
+		);
+	}
+
 	@SuppressWarnings('PMD.ApexDoc')
 	global class AccountTriggerRecord extends TriggerRecord {
 		global Account record {
