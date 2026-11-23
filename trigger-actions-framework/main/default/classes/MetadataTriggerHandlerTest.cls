@@ -637,7 +637,9 @@ private class MetadataTriggerHandlerTest {
 		MetadataTriggerHandler.bypass(TestBeforeInsert.class);
 
 		System.Assert.isTrue(
-			MetadataTriggerHandler.bypassedActions.contains(TEST_BEFORE_INSERT),
+			MetadataTriggerHandler.bypassedActions.contains(
+				TestBeforeInsert.class.getName()
+			),
 			BYPASSES_SHOULD_BE_CONFIGURED_PROPERLY
 		);
 	}
@@ -648,7 +650,9 @@ private class MetadataTriggerHandlerTest {
 		MetadataTriggerHandler.clearBypass(TestBeforeInsert.class);
 
 		System.Assert.isFalse(
-			MetadataTriggerHandler.bypassedActions.contains(TEST_BEFORE_INSERT),
+			MetadataTriggerHandler.bypassedActions.contains(
+				TestBeforeInsert.class.getName()
+			),
 			BYPASSES_SHOULD_BE_CONFIGURED_PROPERLY
 		);
 	}
