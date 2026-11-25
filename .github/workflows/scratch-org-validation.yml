@@ -39,6 +39,9 @@ jobs:
       - name: Install Salesforce CLI
         run: npm install @salesforce/cli -g
 
+      # The key file has to stay until the end of the job: sf re-reads it whenever it
+      # refreshes the DevHub session (scratch org creation and deletion).
+      # $RUNNER_TEMP is outside the checkout and is wiped after the job.
       - name: Authenticate into DevHub
         run: |
           echo "$SALESFORCE_JWT_SECRET_KEY" > "$RUNNER_TEMP/server.key"
@@ -47,7 +50,6 @@ jobs:
             --client-id "$SALESFORCE_CONSUMER_KEY" \
             --username "$SALESFORCE_DEVHUB_USERNAME" \
             --jwt-key-file "$RUNNER_TEMP/server.key"
-          rm "$RUNNER_TEMP/server.key"
         env:
           SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY }}
           SALESFORCE_DEVHUB_USERNAME: ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
