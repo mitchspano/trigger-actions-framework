@@ -38,7 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Fork PRs don't get secrets, so a maintainer validates them with the Validate PR workflow
+  # Deploys to a scratch org and runs the Apex tests. Fork PRs don't get the
+  # DevHub secrets, so they're skipped here and handled by validate-fork.
   validate:
     needs: scan
     if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -47,3 +48,54 @@ jobs:
       SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY }}
       SALESFORCE_DEVHUB_USERNAME: ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
       SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+
+  # Fails until a maintainer reviews the fork PR and runs Validate PR for its
+  # head commit. When that passes, Validate PR re-runs this job and it turns green.
+  validate-fork:
+    if: ${{ github.event.pull_request.head.repo.fork }}
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+    steps:
+      - name: Check whether a maintainer validated this commit
+        id: check
+        run: |
+          state=$(gh api "repos/$GH_REPO/commits/$HEAD_SHA/status" \
+            --jq '.statuses[] | select(.context == "Validate PR / scratch org") | .state')
+
+          echo "Validate PR status: ${state:-none}"
+
+          if [ "$state" = success ]; then
+            echo "validated=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ask a maintainer to validate this commit
+        if: steps.check.outputs.validated != 'true'
+        run: |
+          command="gh workflow run \"Validate PR\" -f pr=$PR -f sha=$HEAD_SHA"
+
+          echo "::error title=Scratch org validation needed::After reviewing this fork PR, a maintainer runs: $command"
+
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### Scratch org validation needed
+
+          This PR comes from a fork, so CI can't use the DevHub secrets to validate it.
+          After reviewing the changes, a maintainer runs:
+
+          ~~~sh
+          $command
+          ~~~
+
+          Or use **Run workflow** on the [Validate PR]($WORKFLOW_URL) page with the same values.
+          When it passes, this job re-runs and turns green.
+          EOF
+
+          exit 1
+        env:
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/workflows/validate-pr.yml

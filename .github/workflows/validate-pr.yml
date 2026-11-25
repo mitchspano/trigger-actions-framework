@@ -20,6 +20,7 @@ on:
         type: string
 
 permissions:
+  actions: write # re-runs CI's validate-fork job
   contents: read
   pull-requests: read
   statuses: write
@@ -107,3 +108,20 @@ jobs:
         env:
           HEAD_SHA: ${{ needs.check-pr.outputs.head-sha }}
           RESULT: ${{ needs.validate.result }}
+
+      # CI's validate-fork job failed because this commit wasn't validated yet.
+      # Re-running it now finds the passing status and turns the PR's check green.
+      - name: Re-run CI's validate-fork job
+        if: needs.validate.result == 'success'
+        run: |
+          failed_run=$(gh run list --workflow CI.yml --commit "$HEAD_SHA" --status failure \
+            --limit 1 --json databaseId --jq '.[0].databaseId')
+
+          if [ -z "$failed_run" ]; then
+            echo "No failed CI run for $HEAD_SHA"
+            exit 0
+          fi
+
+          gh run rerun "$failed_run" --failed
+        env:
+          HEAD_SHA: ${{ needs.check-pr.outputs.head-sha }}
