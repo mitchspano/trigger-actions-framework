@@ -20,6 +20,10 @@ jobs:
         with:
           check-latest: true
 
+      # Code Analyzer's ESLint engine loads eslint.config.mjs, which imports devDependencies
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install Salesforce CLI + Code Analyzer
         run: |
           npm install @salesforce/cli -g
