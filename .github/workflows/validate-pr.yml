@@ -111,11 +111,13 @@ jobs:
 
       # CI's validate-fork job failed because this commit wasn't validated yet.
       # Re-running it now finds the passing status and turns the PR's check green.
+      # (gh's --status filter can't be used: it matches a run's first attempt, which
+      # for fork PRs is the one waiting for approval.)
       - name: Re-run CI's validate-fork job
         if: needs.validate.result == 'success'
         run: |
-          failed_run=$(gh run list --workflow CI.yml --commit "$HEAD_SHA" --status failure \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
+          failed_run=$(gh run list --workflow CI.yml --commit "$HEAD_SHA" --limit 1 \
+            --json databaseId,conclusion --jq '.[] | select(.conclusion == "failure") | .databaseId')
 
           if [ -z "$failed_run" ]; then
             echo "No failed CI run for $HEAD_SHA"
