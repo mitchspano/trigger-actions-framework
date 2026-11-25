@@ -1,0 +1,81 @@
+name: Scratch Org Validation
+
+# Deploys the code to a new scratch org and runs the Apex tests.
+# Called by CI for same-repo PRs, and by Validate PR for fork PRs.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to validate. Defaults to the caller's ref.
+        type: string
+        default: ""
+    secrets:
+      SALESFORCE_CONSUMER_KEY:
+        required: true
+      SALESFORCE_DEVHUB_USERNAME:
+        required: true
+      SALESFORCE_JWT_SECRET_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          check-latest: true
+
+      # Only the CLI: the code under test may come from a fork, so its npm
+      # dependencies (and their install scripts) never run here.
+      - name: Install Salesforce CLI
+        run: npm install @salesforce/cli -g
+
+      # The key file has to stay until the end of the job: sf re-reads it whenever it
+      # refreshes the DevHub session (scratch org creation and deletion).
+      # $RUNNER_TEMP is outside the checkout and is wiped after the job.
+      - name: Authenticate into DevHub
+        run: |
+          echo "$SALESFORCE_JWT_SECRET_KEY" > "$RUNNER_TEMP/server.key"
+          sf org login jwt \
+            --alias devhub \
+            --client-id "$SALESFORCE_CONSUMER_KEY" \
+            --username "$SALESFORCE_DEVHUB_USERNAME" \
+            --jwt-key-file "$RUNNER_TEMP/server.key"
+        env:
+          SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY }}
+          SALESFORCE_DEVHUB_USERNAME: ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+
+      - name: Create scratch org
+        id: create-scratch-org
+        run: |
+          sf org create scratch \
+            --alias scratch \
+            --target-dev-hub devhub \
+            --definition-file config/project-scratch-def.json \
+            --duration-days 1
+
+      - name: Deploy
+        run: sf project deploy start --target-org scratch
+
+      - name: Run Apex tests
+        run: |
+          sf apex run test \
+            --target-org scratch \
+            --code-coverage \
+            --result-format human \
+            --synchronous
+
+      # Also after a failed deploy or test run, so failures don't use up scratch org limits
+      - name: Delete scratch org
+        if: always() && steps.create-scratch-org.outcome == 'success'
+        run: sf org delete scratch --target-org scratch --no-prompt
