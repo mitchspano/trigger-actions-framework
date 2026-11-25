@@ -638,6 +638,12 @@ rules:
   # REGEX ENGINE RULE OVERRIDES
   # ======================================================================
   regex:
+    # Prettier formats Apex with tabs, and ApexDoc lines start with " *", so this
+    # flags almost every doc comment. Not Recommended, so the default selector skips it.
+    'NoMixedIndentation':
+      tags:
+        - CodeStyle
+        - Apex
     'NoTrailingWhitespace':
       severity: 5
       tags:

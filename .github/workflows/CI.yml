@@ -20,15 +20,15 @@ jobs:
         with:
           check-latest: true
 
-      - name: Install Salesforce CLI + Scanner
+      - name: Install Salesforce CLI + Code Analyzer
         run: |
           npm install @salesforce/cli -g
           sf --version
           sf plugins --core
-          sf plugins install @salesforce/sfdx-scanner
+          sf plugins install code-analyzer
 
-      - name: Run SFDX Scanner - Report findings as comments
-        uses: mitchspano/sfdx-scan-pull-request@v0.1.16
+      - name: Run Code Analyzer - Report findings as comments
+        uses: mitchspano/sfdx-scan-pull-request@v0.3.1
         with:
           severity-threshold: 4
           report-mode: ${{ github.event.pull_request.head.repo.fork && 'check-runs' || 'comments' }}
