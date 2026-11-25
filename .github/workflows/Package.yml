@@ -25,13 +25,25 @@ jobs:
       - name: Authenticate into DevHub
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > "$RUNNER_TEMP/server.key"
-          sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file "$RUNNER_TEMP/server.key" --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub
+          sf org login jwt \
+            --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} \
+            --jwt-key-file "$RUNNER_TEMP/server.key" \
+            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} \
+            --set-default-dev-hub \
+            --alias devhub
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
 
       - name: Create package version
         run: |
-          sf package version create --definition-file config/project-scratch-def.json --package "Trigger Actions Framework" --version-number ${{ inputs.packageVersion }} --wait 120 --code-coverage --installation-key-bypass --json | tee "$RUNNER_TEMP/create.json"
+          sf package version create \
+            --package "Trigger Actions Framework" \
+            --version-number ${{ inputs.packageVersion }} \
+            --definition-file config/project-scratch-def.json \
+            --code-coverage \
+            --installation-key-bypass \
+            --wait 120 \
+            --json | tee "$RUNNER_TEMP/create.json"
           id=$(jq -r .result.SubscriberPackageVersionId "$RUNNER_TEMP/create.json")
 
           cat >> "$GITHUB_STEP_SUMMARY" <<EOF

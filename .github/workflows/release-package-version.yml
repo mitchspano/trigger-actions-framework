@@ -40,30 +40,45 @@ jobs:
       - name: Authenticate into DevHub
         run: |
           echo "${SALESFORCE_JWT_SECRET_KEY}" > "$RUNNER_TEMP/server.key"
-          sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file "$RUNNER_TEMP/server.key" --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub
+          sf org login jwt \
+            --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} \
+            --jwt-key-file "$RUNNER_TEMP/server.key" \
+            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} \
+            --set-default-dev-hub \
+            --alias devhub
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
 
       - name: Look up the version number
         run: |
-          sf package version report --package "$PACKAGE_VERSION_ID" --json | jq -r '.result |
+          sf package version report \
+            --package "$PACKAGE_VERSION_ID" \
+            --json | jq -r '.result |
             "VERSION=\(.MajorVersion).\(.MinorVersion).\(.PatchVersion)",
             "BUILD=\(.BuildNumber)"
           ' >> "$GITHUB_ENV"
 
       # Before anything links to it: beta versions can't be installed in production
       - name: Promote
-        run: sf package version promote --package "$PACKAGE_VERSION_ID" --no-prompt
+        run: |
+          sf package version promote \
+            --package "$PACKAGE_VERSION_ID" \
+            --no-prompt
 
       # sf added this alias when it created the version, on a runner that's since been discarded
       - name: Add the version alias to sfdx-project.json
         run: |
-          jq --tab --arg alias "Trigger Actions Framework@$VERSION-$BUILD" '.packageAliases[$alias] = env.PACKAGE_VERSION_ID' \
+          jq --tab \
+            --arg alias "Trigger Actions Framework@$VERSION-$BUILD" \
+            '.packageAliases[$alias] = env.PACKAGE_VERSION_ID' \
             sfdx-project.json > "$RUNNER_TEMP/sfdx-project.json"
           mv "$RUNNER_TEMP/sfdx-project.json" sfdx-project.json
 
       - name: Point the install links at the version
-        run: perl -pi -e "s/p0=04t\w{15}/p0=$PACKAGE_VERSION_ID/g" README.md docs/site/*.md
+        run: |
+          perl -pi -e "s/p0=04t\w{15}/p0=$PACKAGE_VERSION_ID/g" \
+            README.md \
+            docs/site/*.md
 
       # main requires a pull request
       - name: Merge the changes into main
@@ -83,7 +98,10 @@ jobs:
           done
 
       - name: Publish a GitHub Release
-        run: gh release create "v$VERSION" --target main --generate-notes
+        run: |
+          gh release create "v$VERSION" \
+            --target main \
+            --generate-notes
 
       # The merge was made with GITHUB_TOKEN, so it didn't trigger pages.yml
       - name: Deploy the docs site
