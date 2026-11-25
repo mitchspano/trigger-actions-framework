@@ -1,0 +1,90 @@
+name: Release Package Version
+
+# Promotes a package version from Generate Package Version, adds its alias to
+# sfdx-project.json, points the install links at it, and publishes a GitHub Release.
+on:
+  workflow_dispatch:
+    inputs:
+      packageVersionId:
+        description: Package version id (04t...)
+        required: true
+        type: string
+
+permissions:
+  actions: write # runs pages.yml
+  contents: write # pushes the release branch and creates the release
+  pull-requests: write # opens and merges the release PR
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  PACKAGE_VERSION_ID: ${{ inputs.packageVersionId }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # Not the dispatched branch: the release commit goes on top of whatever is checked out
+      - name: Checkout main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ">=20"
+
+      - name: Install sf cli
+        run: |
+          npm install --global @salesforce/cli
+
+      - name: Authenticate into DevHub
+        run: |
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > "$RUNNER_TEMP/server.key"
+          sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file "$RUNNER_TEMP/server.key" --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub
+        env:
+          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+
+      - name: Look up the version number
+        run: |
+          sf package version report --package "$PACKAGE_VERSION_ID" --json | jq -r '.result |
+            "VERSION=\(.MajorVersion).\(.MinorVersion).\(.PatchVersion)",
+            "BUILD=\(.BuildNumber)"
+          ' >> "$GITHUB_ENV"
+
+      # Before anything links to it: beta versions can't be installed in production
+      - name: Promote
+        run: sf package version promote --package "$PACKAGE_VERSION_ID" --no-prompt
+
+      # sf added this alias when it created the version, on a runner that's since been discarded
+      - name: Add the version alias to sfdx-project.json
+        run: |
+          jq --tab --arg alias "Trigger Actions Framework@$VERSION-$BUILD" '.packageAliases[$alias] = env.PACKAGE_VERSION_ID' \
+            sfdx-project.json > "$RUNNER_TEMP/sfdx-project.json"
+          mv "$RUNNER_TEMP/sfdx-project.json" sfdx-project.json
+
+      - name: Point the install links at the version
+        run: perl -pi -e "s/p0=04t\w{15}/p0=$PACKAGE_VERSION_ID/g" README.md docs/site/*.md
+
+      # main requires a pull request
+      - name: Merge the changes into main
+        timeout-minutes: 5
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "release/v$VERSION"
+          git commit --all --message "Release v$VERSION"
+          git push --set-upstream origin "release/v$VERSION"
+          gh pr create --fill
+
+          # GitHub checks a new pull request's mergeability in the background,
+          # so merging can fail for the first few seconds
+          until gh pr merge --squash --delete-branch; do
+            sleep 10
+          done
+
+      - name: Publish a GitHub Release
+        run: gh release create "v$VERSION" --target main --generate-notes
+
+      # The merge was made with GITHUB_TOKEN, so it didn't trigger pages.yml
+      - name: Deploy the docs site
+        run: gh workflow run pages.yml
