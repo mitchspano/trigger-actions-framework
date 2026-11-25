@@ -763,13 +763,14 @@ public inherited sharing class MetadataTriggerHandler extends TriggerBase implem
 	@TestVisible
 	private virtual inherited sharing class Selector {
 		/**
-		 * @description Query the database.
+		 * @description Query the database in system mode, so that users without access to
+		 * the Trigger Action custom metadata types can still run triggers.
 		 *
 		 * @param queryString The query string.
 		 * @return The list of SObjects returned by the query.
 		 */
 		public virtual List<SObject> query(String queryString) {
-			return Database.query(queryString);
+			return Database.query(queryString, AccessLevel.SYSTEM_MODE);
 		}
 
 		/**
