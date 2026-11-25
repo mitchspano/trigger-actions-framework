@@ -1,0 +1,109 @@
+name: Validate PR
+
+# Runs the scratch org validation for a pull request from a fork, which CI
+# can't do because fork PRs don't get secrets. Review the PR's diff first:
+# this runs its code with the DevHub credentials.
+#
+#   gh workflow run "Validate PR" -f pr=<number> -f sha=<reviewed head commit>
+#
+# The result is reported on the PR as the "Validate PR / scratch org" status.
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+        type: number
+      sha:
+        description: Head commit you reviewed. If set, the run stops when the PR has new commits.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: validate-pr-${{ inputs.pr }}
+  cancel-in-progress: true
+
+# Used by the gh commands in every job
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+  STATUS_CONTEXT: Validate PR / scratch org
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  check-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      head-sha: ${{ steps.check.outputs.head-sha }}
+
+    steps:
+      - name: Check the PR is open and unchanged since review
+        id: check
+        run: |
+          pr=$(gh pr view "$PR" --json state,headRefOid)
+          state=$(jq -r .state <<< "$pr")
+          head_sha=$(jq -r .headRefOid <<< "$pr")
+
+          if [ "$state" != OPEN ]; then
+            echo "::error::PR #$PR is $state"
+            exit 1
+          fi
+
+          if [ -n "$REVIEWED_SHA" ] && [ "$head_sha" != "$REVIEWED_SHA" ]; then
+            echo "::error::PR #$PR has new commits since $REVIEWED_SHA (head is $head_sha). Review them, then run again."
+            exit 1
+          fi
+
+          echo "head-sha=$head_sha" >> "$GITHUB_OUTPUT"
+        env:
+          PR: ${{ inputs.pr }}
+          REVIEWED_SHA: ${{ inputs.sha }}
+
+      - name: Mark the PR as pending
+        run: |
+          gh api "repos/$GH_REPO/statuses/$HEAD_SHA" --silent \
+            -f state=pending \
+            -f context="$STATUS_CONTEXT" \
+            -f description="Scratch org validation running" \
+            -f target_url="$RUN_URL"
+        env:
+          HEAD_SHA: ${{ steps.check.outputs.head-sha }}
+
+  # Validates the exact commit that was checked, not a branch that could move
+  validate:
+    needs: check-pr
+    uses: ./.github/workflows/scratch-org-validation.yml
+    with:
+      ref: ${{ needs.check-pr.outputs.head-sha }}
+    secrets:
+      SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY }}
+      SALESFORCE_DEVHUB_USERNAME: ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
+      SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
+
+  report:
+    needs: [check-pr, validate]
+    if: always() && needs.check-pr.result == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Report the result on the PR
+        run: |
+          if [ "$RESULT" = success ]; then
+            state=success
+          else
+            state=failure
+          fi
+
+          gh api "repos/$GH_REPO/statuses/$HEAD_SHA" --silent \
+            -f state="$state" \
+            -f context="$STATUS_CONTEXT" \
+            -f description="Scratch org validation: $RESULT" \
+            -f target_url="$RUN_URL"
+        env:
+          HEAD_SHA: ${{ needs.check-pr.outputs.head-sha }}
+          RESULT: ${{ needs.validate.result }}

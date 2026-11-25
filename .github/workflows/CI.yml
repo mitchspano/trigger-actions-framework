@@ -7,13 +7,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  scan:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v6
@@ -28,28 +27,23 @@ jobs:
       - name: Install Salesforce CLI + Code Analyzer
         run: |
           npm install @salesforce/cli -g
-          sf --version
-          sf plugins --core
           sf plugins install code-analyzer
 
-      - name: Run Code Analyzer - Report findings as comments
+      - name: Run Code Analyzer
         uses: mitchspano/sfdx-scan-pull-request@v0.3.1
         with:
           severity-threshold: 4
+          # Fork PRs get a read-only token, which can't post review comments
           report-mode: ${{ github.event.pull_request.head.repo.fork && 'check-runs' || 'comments' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Authenticate into DevHub
-        run: |
-          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub
-        env:
-          SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
-
-      - name: Validate Contents in a Scratch Org
-        run: |
-          sf org create scratch --target-dev-hub devhub --set-default --definition-file config/project-scratch-def.json --alias scratchOrg --duration-days 1
-          sf project deploy start --target-org scratchOrg
-          sf apex run test --code-coverage --result-format human --synchronous
-          sf org delete scratch --no-prompt --target-org scratchOrg
+  # Fork PRs don't get secrets, so a maintainer validates them with the Validate PR workflow
+  validate:
+    needs: scan
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    uses: ./.github/workflows/scratch-org-validation.yml
+    secrets:
+      SALESFORCE_CONSUMER_KEY: ${{ secrets.SALESFORCE_CONSUMER_KEY }}
+      SALESFORCE_DEVHUB_USERNAME: ${{ secrets.SALESFORCE_DEVHUB_USERNAME }}
+      SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
