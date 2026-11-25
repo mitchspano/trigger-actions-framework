@@ -10,8 +10,6 @@ on:
 jobs:
   create-package-version:
     runs-on: ubuntu-latest
-    outputs:
-      packageId: ${{ steps.create.outputs.packageId }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -26,13 +24,30 @@ jobs:
 
       - name: Authenticate into DevHub
         run: |
-          echo "${SALESFORCE_JWT_SECRET_KEY}" > server.key
-          sf org login jwt --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwt-key-file server.key --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME}} --set-default-dev-hub --alias devhub
+          echo "${SALESFORCE_JWT_SECRET_KEY}" > "$RUNNER_TEMP/server.key"
+          sf org login jwt \
+            --client-id ${{ secrets.SALESFORCE_CONSUMER_KEY }} \
+            --jwt-key-file "$RUNNER_TEMP/server.key" \
+            --username ${{ secrets.SALESFORCE_DEVHUB_USERNAME }} \
+            --set-default-dev-hub \
+            --alias devhub
         env:
           SALESFORCE_JWT_SECRET_KEY: ${{ secrets.SALESFORCE_JWT_SECRET_KEY }}
 
       - name: Create package version
-        id: create
         run: |
-          sf package version create --definition-file config/project-scratch-def.json --package "Trigger Actions Framework" --version-number ${{ inputs.packageVersion }} --wait 120 --code-coverage --installation-key-bypass
-          cat sfdx-project.json
+          sf package version create \
+            --package "Trigger Actions Framework" \
+            --version-number ${{ inputs.packageVersion }} \
+            --definition-file config/project-scratch-def.json \
+            --code-coverage \
+            --installation-key-bypass \
+            --wait 120 \
+            --json | tee "$RUNNER_TEMP/create.json"
+          id=$(jq -r .result.SubscriberPackageVersionId "$RUNNER_TEMP/create.json")
+
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          Created \`$id\`. [Install it in a sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=$id) to test it, then release it:
+
+              gh workflow run "Release Package Version" -f packageVersionId=$id
+          EOF
