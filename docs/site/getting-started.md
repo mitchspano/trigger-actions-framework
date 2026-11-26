@@ -4,8 +4,8 @@
 
 Install the framework via an Unlocked Package:
 
-- [Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000giHZAAY)
-- [Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000giHZAAY)
+- [Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000mWdVAAU)
+- [Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000mWdVAAU)
 
 ---
 
