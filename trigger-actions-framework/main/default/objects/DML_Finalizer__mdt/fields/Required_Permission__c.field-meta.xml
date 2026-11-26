@@ -3,10 +3,10 @@
     <fullName>Required_Permission__c</fullName>
     <description>Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will  only execute if the running user has the custom permission identified.</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText>Optional. Enter the API name of a permission. If this field has a value, then the triggers on this object will  only execute if the running user has the custom permission identified.</inlineHelpText>
     <label>Required Permission</label>
-    <length>255</length>
+    <length>97</length>
     <required>false</required>
     <type>Text</type>
     <unique>false</unique>

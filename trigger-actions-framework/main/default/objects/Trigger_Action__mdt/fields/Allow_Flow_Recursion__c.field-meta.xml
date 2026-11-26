@@ -5,7 +5,7 @@
     <description
 	>Check this box to allow the flow to execute recursively</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
+    <fieldManageability>SubscriberControlled</fieldManageability>
     <inlineHelpText
 	>Check this box to allow the flow to execute recursively</inlineHelpText>
     <label>Allow Flow Recursion?</label>
