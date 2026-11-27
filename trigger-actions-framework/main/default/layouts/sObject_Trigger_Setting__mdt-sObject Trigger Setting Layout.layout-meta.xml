@@ -98,6 +98,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.Before_Insert__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -109,6 +110,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.After_Insert__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -120,6 +122,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.Before_Update__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -131,6 +134,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.After_Update__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -142,6 +146,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.Before_Delete__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -153,6 +158,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.After_Delete__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
@@ -164,6 +170,7 @@
         <fields>Entry_Criteria__c</fields>
         <fields>Description__c</fields>
         <fields>Order__c</fields>
+        <fields>Bypass_Execution__c</fields>
         <relatedList>Trigger_Action__mdt.After_Undelete__c</relatedList>
         <sortField>Order__c</sortField>
         <sortOrder>Asc</sortOrder>
