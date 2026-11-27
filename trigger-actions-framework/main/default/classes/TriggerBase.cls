@@ -30,7 +30,7 @@
  * - A way to now finalize the DML operation.
  * ---
  * To use the `TriggerBase` class, you must create a subclass that implements the `TriggerAction` interface.
- * The `TriggerAction` interface defines the methods that should be implemented by trigger actions.
+ * The `TriggerAction` interface defines the methods that should be implemented by trigger actions. 
  */
 @SuppressWarnings(
 	'PMD.StdCyclomaticComplexity,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.PropertyNamingConventions'
