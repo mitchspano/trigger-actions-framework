@@ -19,6 +19,9 @@
  */
 @SuppressWarnings('PMD.AvoidGlobalModifier')
 global abstract class TriggerRecord {
+	global TriggerRecord() {
+	}
+
 	/**
 	 * @description The new version of the SObject that triggered the current execution context.
 	 */
